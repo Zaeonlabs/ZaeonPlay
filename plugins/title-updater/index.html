@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stream Title Updater</title>
+  <link rel="stylesheet" href="../shared/css/base.css">
+  <link rel="stylesheet" href="../shared/css/themes.css">
+  <script src="../shared/js/theme-loader.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="sp-container">
+    <div class="updater-header sp-fade-in">
+      <div class="sp-flex sp-items-center sp-gap-2">
+        <span class="sp-icon sp-icon--md" id="header-icon"></span>
+        <h1>Stream Info</h1>
+      </div>
+      <div class="status-indicators" id="status-indicators"></div>
+    </div>
+
+    <button class="sp-btn sp-btn-primary sp-btn-block sp-btn-lg update-all-btn sp-fade-in" id="update-all" style="animation-delay:.05s">
+      <span class="sp-icon sp-icon--sm" id="btn-icon-refresh"></span>
+      Update All Platforms
+    </button>
+
+    <div class="platform-list" id="platform-list">
+      <div class="metrics-loading sp-fade-in">Loading stream info&hellip;</div>
+    </div>
+  </div>
+
+  <script src="../shared/js/icons.js"></script>
+  <script src="../shared/js/utils.js"></script>
+  <script src="../shared/js/api-client.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

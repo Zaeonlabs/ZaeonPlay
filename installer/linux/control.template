@@ -1,0 +1,12 @@
+Package: __PACKAGE_NAME__
+Version: __VERSION__
+Section: video
+Priority: optional
+Architecture: amd64
+Maintainer: StreamPlugins Contributors <devs@streamplugins.dev>
+Depends: __DEPENDS__
+Homepage: https://github.com/StreamPlugins/StreamPlugins
+Description: __DESCRIPTION__
+ Multi-platform streaming tools for OBS Studio supporting Twitch, YouTube,
+ and Kick. Includes metrics widgets, stream title updater, alerts overlay,
+ unified chat, and Discord logging.

@@ -1,0 +1,69 @@
+body { background: transparent; }
+
+.chat-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--sp-2);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.chat-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  padding: var(--sp-1) var(--sp-2);
+  border-radius: var(--sp-r-sm);
+  animation: chatFadeIn .2s var(--sp-ease);
+  transition: background var(--sp-t-fast);
+}
+.chat-msg:hover {
+  background: rgba(255,255,255,.04);
+}
+
+.chat-msg-platform {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.chat-msg-time {
+  flex-shrink: 0;
+  font-size: var(--sp-fs-xs);
+  color: var(--sp-text-muted);
+  min-width: 44px;
+  margin-top: 3px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chat-msg-body {
+  flex: 1;
+  min-width: 0;
+  word-wrap: break-word;
+  line-height: 1.45;
+}
+
+.chat-msg-username {
+  font-weight: 700;
+  margin-right: var(--sp-1);
+}
+.chat-msg-username--twitch  { color: var(--sp-twitch); }
+.chat-msg-username--youtube { color: var(--sp-youtube); }
+.chat-msg-username--kick    { color: var(--sp-kick); }
+
+.chat-msg-content {
+  color: var(--sp-text-primary);
+  font-size: var(--sp-fs-sm);
+}
+
+@keyframes chatFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

@@ -1,0 +1,71 @@
+# Dependencies
+node_modules/
+.pnp.*
+.yarn/
+
+# Build output
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# Native plugin build
+native-plugin/build/
+native-plugin/cmake-build-*/
+*.dll
+*.so
+*.dylib
+*.obj
+*.o
+*.lib
+
+# Compiled server binary
+server/streamplugins-server
+server/streamplugins-server.exe
+
+# Tray app build
+tray-app/dist/
+tray-app/out/
+
+# Installer output
+installer/output/
+*.msi
+*.pkg
+*.deb
+*.AppImage
+*.snap
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+tokens.json
+config.local.json
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE
+.vscode/
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Temp files
+tmp/
+temp/
+*.tmp

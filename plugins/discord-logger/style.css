@@ -1,0 +1,12 @@
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-1) 0;
+  font-size: var(--sp-fs-sm);
+}
+.toggle-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+}

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donation Alerts Settings</title>
+  <link rel="stylesheet" href="../shared/css/base.css">
+  <link rel="stylesheet" href="../shared/css/themes.css">
+  <script src="../shared/js/theme-loader.js"></script>
+  <style>
+    .field-group { margin-bottom: var(--sp-4); }
+    .field-label {
+      font-size: var(--sp-fs-xs);
+      font-weight: 600;
+      color: var(--sp-text-muted);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-bottom: 4px;
+    }
+    .info-box {
+      background: var(--sp-bg-tertiary);
+      border-radius: var(--sp-r-md);
+      padding: var(--sp-3);
+      font-size: var(--sp-fs-xs);
+      color: var(--sp-text-secondary);
+      line-height: 1.6;
+      margin-bottom: var(--sp-4);
+    }
+    .info-box code {
+      background: var(--sp-bg-primary);
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: var(--sp-fs-xs);
+    }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      padding: var(--sp-1) 0;
+      font-size: var(--sp-fs-sm);
+    }
+  </style>
+</head>
+<body>
+  <div class="sp-container">
+    <div class="sp-flex sp-items-center sp-gap-2 sp-mb-4 sp-fade-in">
+      <span class="sp-icon sp-icon--md" id="header-icon"></span>
+      <h1 style="font-size:var(--sp-fs-lg);font-weight:700">Donation Alerts</h1>
+    </div>
+
+    <div class="info-box sp-fade-in" style="animation-delay:.05s">
+      Webhook-based donation services need a public URL to reach your local server.
+      Use a tunnel like <strong>ngrok</strong> or <strong>Cloudflare Tunnel</strong>
+      and set the public URL below. Your webhook endpoints will be:
+      <br><code>{Public URL}/webhooks/paypal</code>,
+      <code>/webhooks/stripe</code>,
+      <code>/webhooks/kofi</code>, etc.
+    </div>
+
+    <div class="sp-card sp-mb-4 sp-fade-in" style="animation-delay:.1s">
+      <div class="field-group">
+        <div class="field-label">Public Tunnel URL</div>
+        <input type="url" id="tunnel-url" placeholder="https://abc123.ngrok.io" class="sp-w-full">
+      </div>
+    </div>
+
+    <p class="sp-section-title sp-fade-in" style="animation-delay:.12s">Payment Platforms</p>
+
+    <div class="sp-card sp-mb-4 sp-fade-in" style="animation-delay:.15s">
+      <div class="field-group">
+        <div class="field-label">PayPal Webhook ID</div>
+        <input type="text" id="paypal-id" placeholder="PayPal webhook ID" class="sp-w-full">
+      </div>
+      <div class="field-group">
+        <div class="field-label">Stripe Webhook Secret</div>
+        <input type="password" id="stripe-secret" placeholder="whsec_..." class="sp-w-full">
+      </div>
+      <div class="field-group">
+        <div class="field-label">Ko-fi Verification Token</div>
+        <input type="text" id="kofi-token" placeholder="Ko-fi token" class="sp-w-full">
+      </div>
+      <div class="field-group">
+        <div class="field-label">Buy Me a Coffee Webhook Secret</div>
+        <input type="password" id="bmc-secret" placeholder="BMC secret" class="sp-w-full">
+      </div>
+      <div class="field-group">
+        <div class="field-label">Streamlabs Socket API Token</div>
+        <input type="password" id="streamlabs-token" placeholder="Streamlabs token" class="sp-w-full">
+      </div>
+    </div>
+
+    <p class="sp-section-title sp-fade-in" style="animation-delay:.18s">Enabled Sources</p>
+
+    <div class="sp-card sp-mb-4 sp-fade-in" style="animation-delay:.2s">
+      <div class="toggle-row"><label class="sp-toggle"><input type="checkbox" id="en-paypal" checked><span class="sp-toggle-track"></span></label><span>PayPal</span></div>
+      <div class="toggle-row"><label class="sp-toggle"><input type="checkbox" id="en-stripe" checked><span class="sp-toggle-track"></span></label><span>Stripe</span></div>
+      <div class="toggle-row"><label class="sp-toggle"><input type="checkbox" id="en-kofi" checked><span class="sp-toggle-track"></span></label><span>Ko-fi</span></div>
+      <div class="toggle-row"><label class="sp-toggle"><input type="checkbox" id="en-bmc" checked><span class="sp-toggle-track"></span></label><span>Buy Me a Coffee</span></div>
+      <div class="toggle-row"><label class="sp-toggle"><input type="checkbox" id="en-streamlabs" checked><span class="sp-toggle-track"></span></label><span>Streamlabs</span></div>
+    </div>
+
+    <button class="sp-btn sp-btn-primary sp-btn-block sp-btn-lg sp-fade-in" style="animation-delay:.22s" id="save-btn">Save Settings</button>
+  </div>
+
+  <script src="../shared/js/icons.js"></script>
+  <script src="../shared/js/utils.js"></script>
+  <script src="../shared/js/api-client.js"></script>
+  <script>
+    SPIcons.inject(document.getElementById('header-icon'), 'dollar');
+
+    const FIELDS = {
+      tunnelUrl:       'tunnel-url',
+      paypalWebhookId: 'paypal-id',
+      stripeSecret:    'stripe-secret',
+      kofiToken:       'kofi-token',
+      bmcSecret:       'bmc-secret',
+      streamlabsToken: 'streamlabs-token',
+    };
+    const TOGGLES = {
+      paypal: 'en-paypal', stripe: 'en-stripe', kofi: 'en-kofi',
+      buymeacoffee: 'en-bmc', streamlabs: 'en-streamlabs',
+    };
+
+    async function load() {
+      try {
+        const cfg = await StreamPluginsAPI.getConfig();
+        const d = cfg.donations || {};
+        for (const [key, id] of Object.entries(FIELDS)) {
+          if (d[key]) document.getElementById(id).value = d[key];
+        }
+        const enabled = d.enabled || {};
+        for (const [key, id] of Object.entries(TOGGLES)) {
+          document.getElementById(id).checked = enabled[key] !== false;
+        }
+      } catch (_) {}
+    }
+
+    document.getElementById('save-btn').addEventListener('click', async () => {
+      const donations = { enabled: {} };
+      for (const [key, id] of Object.entries(FIELDS)) donations[key] = document.getElementById(id).value.trim();
+      for (const [key, id] of Object.entries(TOGGLES)) donations.enabled[key] = document.getElementById(id).checked;
+      try {
+        await StreamPluginsAPI.updateConfig({ donations });
+        showToast('Donation settings saved', 'success');
+      } catch {
+        showToast('Failed to save', 'error');
+      }
+    });
+
+    load();
+  </script>
+</body>
+</html>

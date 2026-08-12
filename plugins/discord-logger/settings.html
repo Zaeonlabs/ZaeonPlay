@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discord Logger Settings</title>
+  <link rel="stylesheet" href="../shared/css/base.css">
+  <link rel="stylesheet" href="../shared/css/themes.css">
+  <script src="../shared/js/theme-loader.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="sp-container">
+    <div class="sp-flex sp-items-center sp-gap-2 sp-mb-4 sp-fade-in">
+      <span class="sp-icon sp-icon--md" id="header-icon"></span>
+      <h1 style="font-size:var(--sp-fs-lg);font-weight:700">Discord Logger</h1>
+    </div>
+
+    <!-- Chat Webhook -->
+    <div class="sp-card sp-mb-4 sp-fade-in" style="animation-delay:.05s">
+      <div class="sp-flex sp-items-center sp-gap-2 sp-mb-2">
+        <span class="sp-icon sp-icon--sm" id="icon-chat"></span>
+        <h2 style="font-size:var(--sp-fs-md);font-weight:600">Chat Webhook</h2>
+      </div>
+      <p class="sp-text-sm sp-text-muted sp-mb-2">Forward all chat messages to a Discord channel.</p>
+      <input type="url" id="chat-webhook" placeholder="https://discord.com/api/webhooks/..." class="sp-w-full sp-mb-2">
+      <div class="toggle-row">
+        <label class="sp-toggle"><input type="checkbox" id="chat-twitch" checked><span class="sp-toggle-track"></span></label>
+        <span class="sp-flex sp-items-center sp-gap-1"><span class="sp-icon sp-icon--xs" data-icon="twitch" data-color="#9146FF"></span> Twitch</span>
+      </div>
+      <div class="toggle-row">
+        <label class="sp-toggle"><input type="checkbox" id="chat-youtube" checked><span class="sp-toggle-track"></span></label>
+        <span class="sp-flex sp-items-center sp-gap-1"><span class="sp-icon sp-icon--xs" data-icon="youtube" data-color="#FF0000"></span> YouTube</span>
+      </div>
+      <div class="toggle-row">
+        <label class="sp-toggle"><input type="checkbox" id="chat-kick" checked><span class="sp-toggle-track"></span></label>
+        <span class="sp-flex sp-items-center sp-gap-1"><span class="sp-icon sp-icon--xs" data-icon="kick" data-color="#53FC18"></span> Kick</span>
+      </div>
+    </div>
+
+    <!-- Events Webhook -->
+    <div class="sp-card sp-mb-4 sp-fade-in" style="animation-delay:.1s">
+      <div class="sp-flex sp-items-center sp-gap-2 sp-mb-2">
+        <span class="sp-icon sp-icon--sm" id="icon-bell"></span>
+        <h2 style="font-size:var(--sp-fs-md);font-weight:600">Events Webhook</h2>
+      </div>
+      <p class="sp-text-sm sp-text-muted sp-mb-2">Log stream events (subs, follows, raids, bits) to Discord.</p>
+      <input type="url" id="events-webhook" placeholder="https://discord.com/api/webhooks/..." class="sp-w-full sp-mb-2">
+      <div class="toggle-row">
+        <label class="sp-toggle"><input type="checkbox" id="evt-subs" checked><span class="sp-toggle-track"></span></label>
+        <span>Subscriptions</span>
+      </div>
+      <div class="toggle-row">
+        <label class="sp-toggle"><input type="checkbox" id="evt-follows" checked><span class="sp-toggle-track"></span></label>
+        <span>Follows</span>
+      </div>
+      <div class="toggle-row">
+        <label class="sp-toggle"><input type="checkbox" id="evt-raids" checked><span class="sp-toggle-track"></span></label>
+        <span>Raids</span>
+      </div>
+      <div class="toggle-row">
+        <label class="sp-toggle"><input type="checkbox" id="evt-bits" checked><span class="sp-toggle-track"></span></label>
+        <span>Bits / Super Chat</span>
+      </div>
+      <div class="toggle-row">
+        <label class="sp-toggle"><input type="checkbox" id="evt-gifts" checked><span class="sp-toggle-track"></span></label>
+        <span>Gift Subs</span>
+      </div>
+    </div>
+
+    <button class="sp-btn sp-btn-primary sp-btn-block sp-btn-lg sp-fade-in" style="animation-delay:.15s" id="save-btn">
+      Save Settings
+    </button>
+  </div>
+
+  <script src="../shared/js/icons.js"></script>
+  <script src="../shared/js/utils.js"></script>
+  <script src="../shared/js/api-client.js"></script>
+  <script>
+    SPIcons.inject(document.getElementById('header-icon'), 'discord', { color: '#5865F2' });
+    SPIcons.inject(document.getElementById('icon-chat'), 'chat');
+    SPIcons.inject(document.getElementById('icon-bell'), 'bell');
+
+    document.querySelectorAll('[data-icon]').forEach(el => {
+      SPIcons.inject(el, el.dataset.icon, { color: el.dataset.color });
+    });
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>

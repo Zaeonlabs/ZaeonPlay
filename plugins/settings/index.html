@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StreamPlugins Settings</title>
+  <link rel="stylesheet" href="../shared/css/base.css">
+  <link rel="stylesheet" href="../shared/css/themes.css">
+  <script src="../shared/js/theme-loader.js"></script>
+  <style>
+    .settings-header {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      margin-bottom: var(--sp-6);
+    }
+    .settings-header h1 {
+      font-size: var(--sp-fs-lg);
+      font-weight: 700;
+    }
+
+    .platform-list { display: flex; flex-direction: column; gap: var(--sp-3); }
+
+    .platform-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--sp-4);
+    }
+    .platform-info { display: flex; align-items: center; gap: var(--sp-3); }
+    .platform-name { font-weight: 600; }
+    .platform-status { font-size: var(--sp-fs-sm); color: var(--sp-text-secondary); }
+
+    /* Theme picker */
+    .theme-section { margin-top: var(--sp-6); }
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: var(--sp-2);
+    }
+    .theme-swatch {
+      position: relative;
+      border: 2px solid var(--sp-border);
+      border-radius: var(--sp-r-md);
+      padding: var(--sp-2) var(--sp-3);
+      cursor: pointer;
+      text-align: center;
+      font-size: var(--sp-fs-xs);
+      font-weight: 600;
+      background: var(--sp-bg-secondary);
+      color: var(--sp-text-primary);
+      transition: border-color var(--sp-t-fast), transform var(--sp-t-fast);
+    }
+    .theme-swatch:hover { transform: translateY(-1px); }
+    .theme-swatch.active { border-color: var(--sp-accent); box-shadow: 0 0 8px color-mix(in srgb, var(--sp-accent) 30%, transparent); }
+    .theme-swatch .preview-bar {
+      height: 6px;
+      border-radius: 3px;
+      margin-bottom: var(--sp-1);
+    }
+
+    .version-info {
+      margin-top: var(--sp-8);
+      text-align: center;
+      color: var(--sp-text-muted);
+      font-size: var(--sp-fs-xs);
+    }
+  </style>
+</head>
+<body>
+  <div class="sp-container">
+    <div class="settings-header">
+      <span class="sp-icon sp-icon--md" id="header-icon"></span>
+      <h1>StreamPlugins</h1>
+    </div>
+
+    <p class="sp-section-title">Connected Accounts</p>
+
+    <div class="platform-list">
+      <div class="sp-card platform-card sp-fade-in" style="animation-delay:.05s">
+        <div class="platform-info">
+          <span class="sp-dot sp-dot--off" id="twitch-status"></span>
+          <span class="sp-icon sp-icon--md" id="icon-twitch"></span>
+          <div>
+            <div class="platform-name" style="color:var(--sp-twitch)">Twitch</div>
+            <div class="platform-status" id="twitch-user">Not connected</div>
+          </div>
+        </div>
+        <button class="sp-btn sp-btn-primary sp-btn-sm" id="twitch-connect" onclick="connectPlatform('twitch')">Connect</button>
+      </div>
+
+      <div class="sp-card platform-card sp-fade-in" style="animation-delay:.1s">
+        <div class="platform-info">
+          <span class="sp-dot sp-dot--off" id="youtube-status"></span>
+          <span class="sp-icon sp-icon--md" id="icon-youtube"></span>
+          <div>
+            <div class="platform-name" style="color:var(--sp-youtube)">YouTube</div>
+            <div class="platform-status" id="youtube-user">Not connected</div>
+          </div>
+        </div>
+        <button class="sp-btn sp-btn-primary sp-btn-sm" id="youtube-connect" onclick="connectPlatform('youtube')">Connect</button>
+      </div>
+
+      <div class="sp-card platform-card sp-fade-in" style="animation-delay:.15s">
+        <div class="platform-info">
+          <span class="sp-dot sp-dot--off" id="kick-status"></span>
+          <span class="sp-icon sp-icon--md" id="icon-kick"></span>
+          <div>
+            <div class="platform-name" style="color:var(--sp-kick)">Kick</div>
+            <div class="platform-status" id="kick-user">Not connected</div>
+          </div>
+        </div>
+        <button class="sp-btn sp-btn-primary sp-btn-sm" id="kick-connect" onclick="connectPlatform('kick')">Connect</button>
+      </div>
+    </div>
+
+    <div class="theme-section sp-fade-in" style="animation-delay:.2s">
+      <p class="sp-section-title">Theme</p>
+      <div class="theme-grid" id="theme-grid"></div>
+    </div>
+
+    <div class="version-info">StreamPlugins v0.1.0</div>
+  </div>
+
+  <script src="../shared/js/icons.js"></script>
+  <script src="../shared/js/api-client.js"></script>
+  <script src="../shared/js/utils.js"></script>
+  <script>
+    SPIcons.inject(document.getElementById('header-icon'), 'settings');
+    SPIcons.inject(document.getElementById('icon-twitch'), 'twitch', { color: '#9146FF' });
+    SPIcons.inject(document.getElementById('icon-youtube'), 'youtube', { color: '#FF0000' });
+    SPIcons.inject(document.getElementById('icon-kick'), 'kick', { color: '#53FC18' });
+
+    /* ---------- Theme picker ---------- */
+    const THEMES = [
+      { id: 'dark',        label: 'Dark',        bar: '#27272a' },
+      { id: 'light',       label: 'Light',       bar: '#e9ecef' },
+      { id: 'amoled',      label: 'AMOLED',      bar: '#111111' },
+      { id: 'midnight',    label: 'Midnight',    bar: '#182442' },
+      { id: 'cyberpunk',   label: 'Cyberpunk',   bar: '#f472b6' },
+      { id: 'forest',      label: 'Forest',      bar: '#4ade80' },
+      { id: 'transparent', label: 'Transparent', bar: 'rgba(255,255,255,.15)' },
+    ];
+
+    function renderThemes() {
+      const grid = document.getElementById('theme-grid');
+      const current = StreamPluginsTheme.current;
+      grid.innerHTML = THEMES.map(t => `
+        <div class="theme-swatch ${t.id === current ? 'active' : ''}" data-theme-id="${t.id}" onclick="selectTheme('${t.id}')">
+          <div class="preview-bar" style="background:${t.bar}"></div>
+          ${t.label}
+        </div>
+      `).join('');
+    }
+
+    async function selectTheme(id) {
+      StreamPluginsTheme.apply(id);
+      renderThemes();
+      try {
+        await StreamPluginsAPI.updateConfig({ theme: id });
+        showToast(`Theme changed to ${THEMES.find(t => t.id === id)?.label || id}`, 'success');
+      } catch (_) {}
+    }
+
+    renderThemes();
+
+    /* ---------- Auth status ---------- */
+    async function connectPlatform(platform) {
+      window.open(`http://localhost:3847/auth/${platform}/login`, '_blank');
+    }
+
+    async function loadAuthStatus() {
+      try {
+        const status = await StreamPluginsAPI.getAuthStatus();
+        for (const platform of ['twitch', 'youtube', 'kick']) {
+          const dot = document.getElementById(`${platform}-status`);
+          const userEl = document.getElementById(`${platform}-user`);
+          const btn = document.getElementById(`${platform}-connect`);
+          if (status[platform]) {
+            dot.className = 'sp-dot sp-dot--on';
+            userEl.textContent = status[platform].displayName || 'Connected';
+            btn.textContent = 'Disconnect';
+            btn.className = 'sp-btn sp-btn-secondary sp-btn-sm';
+          }
+        }
+      } catch (_) {}
+    }
+
+    loadAuthStatus();
+    setInterval(loadAuthStatus, 10000);
+  </script>
+</body>
+</html>

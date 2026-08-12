@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=StreamPlugins
+GenericName=Multi-platform OBS Streaming Tools
+Comment=Metrics, title updater, alerts, chat, and Discord logger for Twitch, YouTube, and Kick
+Exec=streamplugins-tray
+Icon=streamplugins
+Terminal=false
+Categories=AudioVideo;Video;Network;
+Keywords=OBS;Twitch;YouTube;Kick;Streaming;
+StartupNotify=true

@@ -1,0 +1,19 @@
+{
+  "name": "@streamplugins/tray-app",
+  "version": "0.1.0",
+  "description": "StreamPlugins standalone system tray application",
+  "private": true,
+  "main": "dist/main.js",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "build": "esbuild src/main.ts --bundle --platform=node --target=node22 --outdir=dist --format=esm",
+    "start": "node dist/main.js"
+  },
+  "dependencies": {
+    "@streamplugins/server": "*"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0",
+    "tsx": "^4.19.0"
+  }
+}

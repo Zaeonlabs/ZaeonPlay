@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goal Bars Settings</title>
+  <link rel="stylesheet" href="../shared/css/base.css">
+  <link rel="stylesheet" href="../shared/css/themes.css">
+  <script src="../shared/js/theme-loader.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .goal-form { display: flex; flex-direction: column; gap: var(--sp-3); }
+    .goal-item {
+      padding: var(--sp-3);
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-2);
+    }
+    .goal-item-row { display: flex; gap: var(--sp-2); align-items: center; }
+    .goal-item-row input, .goal-item-row select { flex: 1; }
+    .field-label {
+      font-size: var(--sp-fs-xs);
+      font-weight: 600;
+      color: var(--sp-text-muted);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .remove-btn {
+      background: none;
+      border: none;
+      color: var(--sp-error);
+      cursor: pointer;
+      font-size: var(--sp-fs-sm);
+      padding: var(--sp-1);
+    }
+    .remove-btn:hover { opacity: .7; }
+  </style>
+</head>
+<body>
+  <div class="sp-container">
+    <div class="sp-flex sp-items-center sp-gap-2 sp-mb-4 sp-fade-in">
+      <span class="sp-icon sp-icon--md" id="header-icon"></span>
+      <h1 style="font-size:var(--sp-fs-lg);font-weight:700">Goal Bars</h1>
+    </div>
+
+    <div class="goal-form" id="goal-form"></div>
+
+    <div class="sp-flex sp-gap-2 sp-mt-4">
+      <button class="sp-btn sp-btn-secondary sp-btn-block" id="add-goal-btn">+ Add Goal</button>
+    </div>
+    <div class="sp-mt-4">
+      <button class="sp-btn sp-btn-primary sp-btn-block sp-btn-lg" id="save-btn">Save Goals</button>
+    </div>
+  </div>
+
+  <script src="../shared/js/icons.js"></script>
+  <script src="../shared/js/utils.js"></script>
+  <script src="../shared/js/api-client.js"></script>
+  <script>
+    SPIcons.inject(document.getElementById('header-icon'), 'target');
+
+    let goals = [];
+    const form = document.getElementById('goal-form');
+
+    function renderForm() {
+      form.innerHTML = goals.map((g, i) => `
+        <div class="sp-card goal-item sp-fade-in" style="animation-delay:${i * .05}s">
+          <div class="sp-flex sp-items-center sp-justify-between">
+            <span class="field-label">Goal ${i + 1}</span>
+            <button class="remove-btn" onclick="removeGoal(${i})">&times; Remove</button>
+          </div>
+          <div class="goal-item-row">
+            <div style="flex:1"><div class="field-label">Type</div>
+              <select onchange="goals[${i}].type=this.value">
+                <option value="subscribers" ${g.type==='subscribers'?'selected':''}>Subscribers</option>
+                <option value="followers" ${g.type==='followers'?'selected':''}>Followers</option>
+                <option value="donations" ${g.type==='donations'?'selected':''}>Donations ($)</option>
+              </select>
+            </div>
+          </div>
+          <div class="goal-item-row">
+            <div style="flex:1"><div class="field-label">Label</div>
+              <input type="text" value="${escapeHTML(g.label||'')}" onchange="goals[${i}].label=this.value" placeholder="e.g. Sub Goal">
+            </div>
+          </div>
+          <div class="goal-item-row">
+            <div style="flex:1"><div class="field-label">Target</div>
+              <input type="number" value="${g.target||0}" min="1" onchange="goals[${i}].target=Number(this.value)">
+            </div>
+            <div style="flex:1"><div class="field-label">Current</div>
+              <input type="number" value="${g.current||0}" min="0" onchange="goals[${i}].current=Number(this.value)">
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    window.removeGoal = (i) => { goals.splice(i, 1); renderForm(); };
+
+    document.getElementById('add-goal-btn').addEventListener('click', () => {
+      goals.push({ type: 'subscribers', label: '', target: 100, current: 0, startValue: 0 });
+      renderForm();
+    });
+
+    document.getElementById('save-btn').addEventListener('click', async () => {
+      try {
+        await StreamPluginsAPI.updateConfig({ goals });
+        showToast('Goals saved', 'success');
+      } catch {
+        showToast('Failed to save', 'error');
+      }
+    });
+
+    (async () => {
+      try {
+        const config = await StreamPluginsAPI.getConfig();
+        goals = config.goals || [];
+      } catch (_) {}
+      renderForm();
+    })();
+  </script>
+</body>
+</html>

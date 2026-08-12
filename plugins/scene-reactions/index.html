@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OBS Scene Reactions</title>
+  <link rel="stylesheet" href="../shared/css/base.css">
+  <link rel="stylesheet" href="../shared/css/themes.css">
+  <script src="../shared/js/theme-loader.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="sp-container">
+    <div class="sp-flex sp-items-center sp-gap-2 sp-mb-4 sp-fade-in">
+      <span class="sp-icon sp-icon--md" id="header-icon"></span>
+      <h1 style="font-size:var(--sp-fs-lg);font-weight:700">Scene Reactions</h1>
+    </div>
+
+    <!-- OBS Connection -->
+    <div class="sp-card sp-mb-4 sp-fade-in" style="animation-delay:.05s">
+      <div class="sp-flex sp-items-center sp-justify-between sp-mb-2">
+        <div class="sp-flex sp-items-center sp-gap-2">
+          <span class="sp-icon sp-icon--sm" id="icon-obs"></span>
+          <span style="font-weight:600">OBS WebSocket</span>
+        </div>
+        <span class="sp-dot sp-dot--off" id="obs-status"></span>
+      </div>
+      <div class="sp-flex sp-gap-2 sp-mb-2">
+        <input type="text" id="obs-host" value="localhost" placeholder="Host" style="flex:1">
+        <input type="number" id="obs-port" value="4455" placeholder="Port" style="width:80px">
+      </div>
+      <input type="password" id="obs-password" placeholder="Password (optional)" class="sp-w-full sp-mb-2">
+      <button class="sp-btn sp-btn-primary sp-btn-sm" id="obs-connect-btn">Connect</button>
+    </div>
+
+    <!-- Rules -->
+    <div class="sp-flex sp-items-center sp-justify-between sp-mb-2 sp-fade-in" style="animation-delay:.1s">
+      <p class="sp-section-title" style="margin:0">Reaction Rules</p>
+      <button class="sp-btn sp-btn-secondary sp-btn-sm" id="add-rule-btn">+ Add Rule</button>
+    </div>
+
+    <div id="rules-list"></div>
+
+    <button class="sp-btn sp-btn-primary sp-btn-block sp-btn-lg sp-mt-4 sp-fade-in" style="animation-delay:.15s" id="save-btn">Save Rules</button>
+  </div>
+
+  <script src="../shared/js/icons.js"></script>
+  <script src="../shared/js/utils.js"></script>
+  <script src="../shared/js/api-client.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

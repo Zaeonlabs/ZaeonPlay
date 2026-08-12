@@ -1,0 +1,99 @@
+/* ========================================================
+   StreamPlugins Themes
+   Apply with data-theme="<name>" on <html> or <body>.
+   The default (no attribute) uses the dark variables in base.css.
+   ======================================================== */
+
+/* Light ------------------------------------------------ */
+[data-theme="light"] {
+  --sp-bg-primary: #f8f9fa;
+  --sp-bg-secondary: #ffffff;
+  --sp-bg-tertiary: #e9ecef;
+  --sp-text-primary: #1a1a2e;
+  --sp-text-secondary: #495057;
+  --sp-text-muted: #868e96;
+  --sp-border: #dee2e6;
+  --sp-accent: #7c3aed;
+  --sp-glass-bg: rgba(255, 255, 255, 0.65);
+  --sp-glass-border: rgba(0, 0, 0, 0.08);
+}
+
+/* Transparent (overlays) ------------------------------- */
+[data-theme="transparent"] {
+  --sp-bg-primary: transparent;
+  --sp-bg-secondary: rgba(14, 14, 16, 0.72);
+  --sp-bg-tertiary: rgba(42, 42, 46, 0.72);
+  --sp-text-primary: #ffffff;
+  --sp-text-secondary: #cccccc;
+  --sp-border: rgba(255, 255, 255, 0.08);
+  --sp-glass-bg: rgba(14, 14, 16, 0.55);
+  --sp-glass-border: rgba(255, 255, 255, 0.08);
+}
+
+/* AMOLED (pure black) ---------------------------------- */
+[data-theme="amoled"] {
+  --sp-bg-primary: #000000;
+  --sp-bg-secondary: #0a0a0a;
+  --sp-bg-tertiary: #111111;
+  --sp-text-primary: #f0f0f0;
+  --sp-text-secondary: #999999;
+  --sp-text-muted: #666666;
+  --sp-border: #1a1a1a;
+  --sp-accent: #a855f7;
+  --sp-glass-bg: rgba(10, 10, 10, 0.85);
+  --sp-glass-border: rgba(255, 255, 255, 0.06);
+}
+
+/* Midnight Blue ---------------------------------------- */
+[data-theme="midnight"] {
+  --sp-bg-primary: #0b1120;
+  --sp-bg-secondary: #111b30;
+  --sp-bg-tertiary: #182442;
+  --sp-text-primary: #e0e7ff;
+  --sp-text-secondary: #94a3c8;
+  --sp-text-muted: #5e6e8f;
+  --sp-border: #1e2d4d;
+  --sp-accent: #6366f1;
+  --sp-success: #34d399;
+  --sp-warning: #fbbf24;
+  --sp-error: #f87171;
+  --sp-glass-bg: rgba(11, 17, 32, 0.72);
+  --sp-glass-border: rgba(99, 102, 241, 0.15);
+}
+
+/* Cyberpunk -------------------------------------------- */
+[data-theme="cyberpunk"] {
+  --sp-bg-primary: #0a0a0f;
+  --sp-bg-secondary: #12121c;
+  --sp-bg-tertiary: #1a1a28;
+  --sp-text-primary: #f0e6ff;
+  --sp-text-secondary: #c084fc;
+  --sp-text-muted: #7e5baa;
+  --sp-border: #2d1b4e;
+  --sp-accent: #f472b6;
+  --sp-success: #22d3ee;
+  --sp-warning: #facc15;
+  --sp-error: #fb7185;
+  --sp-twitch: #bf5af2;
+  --sp-youtube: #ff3b5c;
+  --sp-kick: #00ffab;
+  --sp-glass-bg: rgba(10, 10, 15, 0.75);
+  --sp-glass-border: rgba(244, 114, 182, 0.18);
+}
+
+/* Forest ----------------------------------------------- */
+[data-theme="forest"] {
+  --sp-bg-primary: #0f1a10;
+  --sp-bg-secondary: #162117;
+  --sp-bg-tertiary: #1e2e1f;
+  --sp-text-primary: #dce8dc;
+  --sp-text-secondary: #97b297;
+  --sp-text-muted: #5e7a5e;
+  --sp-border: #2a3f2b;
+  --sp-accent: #4ade80;
+  --sp-success: #86efac;
+  --sp-warning: #fde68a;
+  --sp-error: #fca5a5;
+  --sp-glass-bg: rgba(15, 26, 16, 0.72);
+  --sp-glass-border: rgba(74, 222, 128, 0.12);
+}

@@ -1,0 +1,16 @@
+[Unit]
+Description=StreamPlugins local server
+Documentation=https://github.com/StreamPlugins/StreamPlugins
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/streamplugins-server
+Restart=on-failure
+RestartSec=5
+Environment=STREAMPLUGINS_PORT=3847
+# Binds to localhost only; no external exposure.
+
+[Install]
+WantedBy=default.target

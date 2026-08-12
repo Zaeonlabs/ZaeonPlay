@@ -1,0 +1,41 @@
+{
+  "name": "streamplugins",
+  "version": "0.1.0",
+  "description": "Multi-platform streaming tools for OBS Studio -- metrics, title updater, alerts, chat, and Discord logger for Twitch, YouTube, and Kick",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YourOrg/StreamPlugins.git"
+  },
+  "workspaces": [
+    "server",
+    "tray-app"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=server",
+    "build": "npm run build --workspace=server",
+    "build:server": "npm run build --workspace=server",
+    "build:tray": "npm run build --workspace=tray-app",
+    "start": "npm run start --workspace=server",
+    "test": "npm run test --workspace=server",
+    "test:watch": "npm run test:watch --workspace=server",
+    "lint": "eslint . --ext .ts,.js",
+    "lint:fix": "eslint . --ext .ts,.js --fix",
+    "typecheck": "npm run typecheck --workspace=server",
+    "package:server": "node scripts/build.js",
+    "package:obs-plugin": "node scripts/package-obs-plugin.js",
+    "package:tray-app": "node scripts/package-tray-app.js",
+    "clean": "rimraf dist build out server/dist tray-app/dist"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "eslint": "^9.0.0",
+    "rimraf": "^6.0.0",
+    "typescript": "^5.6.0"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  }
+}

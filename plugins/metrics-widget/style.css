@@ -1,0 +1,65 @@
+body { background: transparent; }
+
+.metrics-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  min-height: 100vh;
+}
+
+.metrics-loading {
+  color: var(--sp-text-muted);
+  font-size: var(--sp-fs-sm);
+}
+
+/* Each platform group */
+.metric-group {
+  width: 100%;
+  max-width: 360px;
+}
+.metric-group-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-2);
+  font-size: var(--sp-fs-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.metric-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--sp-r-md);
+  background: var(--sp-glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--sp-glass-border);
+  margin-bottom: var(--sp-2);
+  animation: sp-fadeIn .35s var(--sp-ease) both;
+}
+
+.metric-label {
+  font-size: var(--sp-fs-xs);
+  color: var(--sp-text-muted);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  min-width: 72px;
+}
+
+.metric-value {
+  font-size: var(--sp-fs-xl);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  flex: 1;
+  text-align: right;
+}
+.metric-value.sp-count-glow.is-changing {
+  text-shadow: 0 0 12px var(--sp-accent);
+}
