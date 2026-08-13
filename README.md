@@ -3,8 +3,8 @@
 **Multi-Platform Streaming Tools for OBS Studio**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/StreamPlugins/StreamPlugins/ci.yml?branch=main)](https://github.com/StreamPlugins/StreamPlugins/actions)
-[![Latest Release](https://img.shields.io/github/v/release/StreamPlugins/StreamPlugins)](https://github.com/StreamPlugins/StreamPlugins/releases)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/Zaeonlabs/ZaeonPlay/ci.yml?branch=master)](https://github.com/Zaeonlabs/ZaeonPlay/actions)
+[![Latest Release](https://img.shields.io/github/v/release/Zaeonlabs/ZaeonPlay)](https://github.com/Zaeonlabs/ZaeonPlay/releases)
 [![Discord](https://img.shields.io/discord/000000000000000000?label=Discord&logo=discord&logoColor=white)](https://discord.gg/streamplugins)
 
 ---
@@ -111,7 +111,7 @@ StreamPlugins includes 7 built-in themes: Dark, Light, Transparent, AMOLED, Midn
 
 ### Option A: Native OBS Plugin (Recommended)
 
-1. Download the latest installer from the [Releases](https://github.com/StreamPlugins/StreamPlugins/releases) page.
+1. Download the latest installer from the [Releases](https://github.com/Zaeonlabs/ZaeonPlay/releases) page.
 2. Run the installer and follow the prompts. The installer detects your OBS installation directory automatically.
 3. Restart OBS Studio.
 4. Open **View > Docks** in OBS -- you will see new entries for each StreamPlugins panel.
@@ -121,8 +121,8 @@ StreamPlugins includes 7 built-in themes: Dark, Light, Transparent, AMOLED, Midn
 ### Option B: Standalone / Development
 
 ```bash
-git clone https://github.com/StreamPlugins/StreamPlugins.git
-cd StreamPlugins
+git clone https://github.com/Zaeonlabs/ZaeonPlay.git
+cd ZaeonPlay
 npm install
 npm run dev
 ```
@@ -253,7 +253,7 @@ Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) for gu
 - Submitting pull requests
 - Reporting bugs and requesting features
 
-If you are unsure where to start, check the issues labeled [`good first issue`](https://github.com/StreamPlugins/StreamPlugins/issues?q=label%3A%22good+first+issue%22).
+If you are unsure where to start, check the issues labeled [`good first issue`](https://github.com/Zaeonlabs/ZaeonPlay/issues?q=label%3A%22good+first+issue%22).
 
 ---
 
