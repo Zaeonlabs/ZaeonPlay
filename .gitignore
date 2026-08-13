@@ -39,6 +39,7 @@ installer/output/
 .env
 .env.local
 .env.*.local
+publisher.env
 tokens.json
 config.local.json
 

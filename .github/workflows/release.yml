@@ -27,6 +27,12 @@ jobs:
           pkg_target: node18-win-x64
           server_bin: streamplugins-server.exe
           tray_bin: streamplugins-tray.exe
+          twitch_client_id: ${{ secrets.TWITCH_CLIENT_ID }}
+          twitch_client_secret: ${{ secrets.TWITCH_CLIENT_SECRET }}
+          youtube_client_id: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          youtube_client_secret: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          kick_client_id: ${{ secrets.KICK_CLIENT_ID }}
+          kick_client_secret: ${{ secrets.KICK_CLIENT_SECRET }}
       - uses: actions/upload-artifact@v4
         with:
           name: staged-windows

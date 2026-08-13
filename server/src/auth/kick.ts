@@ -8,6 +8,7 @@ import {
   getRedirectUri,
   requireEnv,
 } from './oauth.js';
+import { reloadCredentials } from '../config/credentials.js';
 import { deleteTokens, getTokens, saveTokens, type StoredTokens } from './tokenStore.js';
 
 const KICK_AUTH_URL = 'https://id.kick.com/oauth/authorize';
@@ -21,6 +22,7 @@ const KICK_SCOPES = [
 ].join(' ');
 
 export function kickLogin(_req: Request, res: Response): void {
+  reloadCredentials();
   try {
     const clientId = requireEnv('KICK_CLIENT_ID');
     const { verifier, challenge } = createPkcePair();
@@ -38,7 +40,10 @@ export function kickLogin(_req: Request, res: Response): void {
     res.redirect(`${KICK_AUTH_URL}?${params}`);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Kick login failed';
-    res.status(500).send(authErrorHtml('Kick not configured', `${message}. Add credentials to <code>%APPDATA%\\StreamPlugins\\.env</code> (see .env.example).`));
+    res.status(503).send(authErrorHtml(
+      'Publisher setup required',
+      `Complete the one-time Publisher Setup in StreamPlugins: Settings before users can connect Kick.<br><br><small>${message}</small>`,
+    ));
   }
 }
 

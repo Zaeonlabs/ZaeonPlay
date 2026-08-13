@@ -65,6 +65,28 @@
       color: var(--sp-text-muted);
       font-size: var(--sp-fs-xs);
     }
+
+    .setup-banner {
+      background: color-mix(in srgb, var(--sp-warning) 15%, var(--sp-bg-secondary));
+      border: 1px solid color-mix(in srgb, var(--sp-warning) 40%, transparent);
+      border-radius: var(--sp-r-md);
+      padding: var(--sp-4);
+      margin-bottom: var(--sp-4);
+      font-size: var(--sp-fs-sm);
+    }
+    .setup-form { display: none; flex-direction: column; gap: var(--sp-3); margin-bottom: var(--sp-6); }
+    .setup-form.visible { display: flex; }
+    .setup-form label { font-size: var(--sp-fs-xs); color: var(--sp-text-secondary); display: block; margin-bottom: 4px; }
+    .setup-form input {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: var(--sp-r-sm);
+      border: 1px solid var(--sp-border);
+      background: var(--sp-bg-tertiary);
+      color: var(--sp-text-primary);
+      font-size: var(--sp-fs-sm);
+    }
+    .setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
   </style>
 </head>
 <body>
@@ -75,6 +97,27 @@
     </div>
 
     <p class="sp-section-title">Connected Accounts</p>
+
+    <div id="setup-banner" class="setup-banner sp-fade-in" style="display:none">
+      <strong>One-time publisher setup</strong> — paste your Twitch / YouTube / Kick <em>developer app</em> keys below.
+      After saving, streamers only click Connect and log in. Register apps at
+      <a href="https://dev.twitch.tv/console/apps" target="_blank">Twitch</a>,
+      <a href="https://console.cloud.google.com/" target="_blank">Google</a>,
+      <a href="https://kick.com/settings/developer" target="_blank">Kick</a>.
+      Redirect URI: <code>http://localhost:3847/auth/{platform}/callback</code>
+    </div>
+
+    <form id="publisher-setup" class="setup-form sp-card">
+      <div class="setup-grid">
+        <div><label>Twitch Client ID</label><input id="tw-id" autocomplete="off"></div>
+        <div><label>Twitch Client Secret</label><input id="tw-secret" type="password" autocomplete="off"></div>
+        <div><label>YouTube Client ID</label><input id="yt-id" autocomplete="off"></div>
+        <div><label>YouTube Client Secret</label><input id="yt-secret" type="password" autocomplete="off"></div>
+        <div><label>Kick Client ID</label><input id="ki-id" autocomplete="off"></div>
+        <div><label>Kick Client Secret</label><input id="ki-secret" type="password" autocomplete="off"></div>
+      </div>
+      <button type="submit" class="sp-btn sp-btn-primary sp-btn-sm" style="align-self:flex-start">Save publisher keys</button>
+    </form>
 
     <div class="platform-list">
       <div class="sp-card platform-card sp-fade-in" style="animation-delay:.05s">
@@ -164,8 +207,49 @@
 
     renderThemes();
 
+    let authReady = { twitch: false, youtube: false, kick: false };
+
+    async function loadPublisherSetup() {
+      try {
+        const health = await fetch('http://localhost:3847/health').then(r => r.json());
+        authReady = health.authConfigured || {};
+        const needsSetup = !health.publisherReady;
+        document.getElementById('setup-banner').style.display = needsSetup ? 'block' : 'none';
+        document.getElementById('publisher-setup').classList.toggle('visible', needsSetup);
+      } catch (_) {}
+    }
+
+    document.getElementById('publisher-setup').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const body = {
+        TWITCH_CLIENT_ID: document.getElementById('tw-id').value,
+        TWITCH_CLIENT_SECRET: document.getElementById('tw-secret').value,
+        YOUTUBE_CLIENT_ID: document.getElementById('yt-id').value,
+        YOUTUBE_CLIENT_SECRET: document.getElementById('yt-secret').value,
+        KICK_CLIENT_ID: document.getElementById('ki-id').value,
+        KICK_CLIENT_SECRET: document.getElementById('ki-secret').value,
+      };
+      try {
+        const res = await fetch('http://localhost:3847/api/setup/credentials', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Save failed');
+        showToast('Publisher keys saved — Connect buttons now open login', 'success');
+        await loadPublisherSetup();
+      } catch (err) {
+        showToast(err.message || 'Failed to save keys', 'error');
+      }
+    });
+
     /* ---------- Auth status ---------- */
     async function connectPlatform(platform) {
+      if (!authReady[platform]) {
+        showToast('Save publisher API keys above first, then click Connect', 'warning');
+        return;
+      }
       const btn = document.getElementById(`${platform}-connect`);
       if (btn.textContent.trim() === 'Disconnect') {
         try {
@@ -204,6 +288,7 @@
       } catch (_) {}
     }
 
+    loadPublisherSetup();
     loadAuthStatus();
     setInterval(loadAuthStatus, 10000);
   </script>

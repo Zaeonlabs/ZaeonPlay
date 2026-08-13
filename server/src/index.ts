@@ -2,15 +2,16 @@ import 'dotenv/config';
 import express from 'express';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
-import { authConfigured, loadCredentials } from './config/credentials.js';
+import { authConfigured, loadCredentials, reloadCredentials } from './config/credentials.js';
 import { getDataDir } from './auth/tokenStore.js';
 import { createApiRouter } from './routes/api.js';
 import { createAuthRouter } from './routes/auth.js';
 import { createConfigRouter } from './routes/config.js';
+import { createSetupRouter } from './routes/setup.js';
 
 declare const __dirname: string;
 
-const credentialsFile = loadCredentials();
+loadCredentials();
 
 function resolvePluginsDir(): string {
   const envDir = process.env.STREAMPLUGINS_PLUGINS_DIR;
@@ -35,18 +36,20 @@ app.use(express.json());
 app.use('/auth', createAuthRouter());
 app.use('/api', createApiRouter());
 app.use('/api/config', createConfigRouter());
+app.use('/api/setup', createSetupRouter());
 
 const pluginsDir = resolvePluginsDir();
 app.use('/plugins', express.static(pluginsDir));
 
 app.get('/health', (_req, res) => {
+  reloadCredentials();
   res.json({
     status: 'ok',
-    version: '0.1.1',
+    version: '0.1.2',
     pluginsDir,
     dataDir: getDataDir(),
-    credentialsFile,
     authConfigured: authConfigured(),
+    publisherReady: Object.values(authConfigured()).some(Boolean),
   });
 });
 

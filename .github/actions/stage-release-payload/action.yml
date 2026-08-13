@@ -14,6 +14,30 @@ inputs:
   tray_bin:
     description: Tray binary filename
     required: true
+  twitch_client_id:
+    description: Twitch OAuth client ID (optional, from GitHub secrets)
+    required: false
+    default: ''
+  twitch_client_secret:
+    description: Twitch OAuth client secret
+    required: false
+    default: ''
+  youtube_client_id:
+    description: YouTube OAuth client ID
+    required: false
+    default: ''
+  youtube_client_secret:
+    description: YouTube OAuth client secret
+    required: false
+    default: ''
+  kick_client_id:
+    description: Kick OAuth client ID
+    required: false
+    default: ''
+  kick_client_secret:
+    description: Kick OAuth client secret
+    required: false
+    default: ''
 
 runs:
   using: composite
@@ -117,22 +141,37 @@ runs:
           chmod +x dist/obs-plugin-linux/streamplugins/data/server/streamplugins-server
         fi
 
-    - name: Ship OAuth config template with install payloads
+    - name: Ship OAuth credentials with install payloads
       shell: bash
       run: |
-        if [[ ! -f .env.example ]]; then
-          echo "No .env.example found; skipping OAuth template copy"
-          exit 0
-        fi
+        write_env() {
+          local dest="$1"
+          mkdir -p "$(dirname "$dest")"
+          if [[ -n "${{ inputs.twitch_client_id }}" ]]; then
+            cat > "$dest" <<EOF
+        STREAMPLUGINS_PORT=3847
+        TWITCH_CLIENT_ID=${{ inputs.twitch_client_id }}
+        TWITCH_CLIENT_SECRET=${{ inputs.twitch_client_secret }}
+        YOUTUBE_CLIENT_ID=${{ inputs.youtube_client_id }}
+        YOUTUBE_CLIENT_SECRET=${{ inputs.youtube_client_secret }}
+        KICK_CLIENT_ID=${{ inputs.kick_client_id }}
+        KICK_CLIENT_SECRET=${{ inputs.kick_client_secret }}
+        EOF
+          elif [[ -f publisher.env ]]; then
+            cp publisher.env "$dest"
+          elif [[ -f .env.example ]]; then
+            cp .env.example "$dest"
+          fi
+        }
         if [[ "${{ inputs.platform }}" == "windows" ]]; then
-          cp .env.example dist/obs-plugin-windows/streamplugins/data/.env
-          cp .env.example dist/tray-app-windows/streamplugins-tray/.env
+          write_env dist/obs-plugin-windows/streamplugins/data/.env
+          write_env dist/tray-app-windows/streamplugins-tray/.env
         fi
         if [[ "${{ inputs.platform }}" == "macos" ]]; then
-          cp .env.example dist/obs-plugin-macos/streamplugins.plugin/Contents/Resources/data/.env
-          cp .env.example dist/tray-app-macos/StreamPlugins.app/Contents/Resources/.env
+          write_env dist/obs-plugin-macos/streamplugins.plugin/Contents/Resources/data/.env
+          write_env dist/tray-app-macos/StreamPlugins.app/Contents/Resources/.env
         fi
         if [[ "${{ inputs.platform }}" == "linux" ]]; then
-          cp .env.example dist/obs-plugin-linux/streamplugins/data/.env
-          cp .env.example dist/tray-app-linux/.env
+          write_env dist/obs-plugin-linux/streamplugins/data/.env
+          write_env dist/tray-app-linux/.env
         fi

@@ -7,6 +7,7 @@ import {
   getRedirectUri,
   requireEnv,
 } from './oauth.js';
+import { reloadCredentials } from '../config/credentials.js';
 import { deleteTokens, getTokens, saveTokens, type StoredTokens } from './tokenStore.js';
 
 const TWITCH_AUTH_URL = 'https://id.twitch.tv/oauth2/authorize';
@@ -20,6 +21,7 @@ const TWITCH_SCOPES = [
 ].join(' ');
 
 export function twitchLogin(_req: Request, res: Response): void {
+  reloadCredentials();
   try {
     const clientId = requireEnv('TWITCH_CLIENT_ID');
     const state = createState('twitch');
@@ -34,7 +36,13 @@ export function twitchLogin(_req: Request, res: Response): void {
     res.redirect(`${TWITCH_AUTH_URL}?${params}`);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Twitch login failed';
-    res.status(500).send(authErrorHtml('Twitch not configured', `${message}. Add credentials to <code>%APPDATA%\\StreamPlugins\\.env</code> (see .env.example).`));
+    res.status(503).send(authErrorHtml(
+      'Publisher setup required',
+      `StreamPlugins needs your Twitch <strong>developer app</strong> keys before users can log in.<br><br>
+       Open <strong>StreamPlugins: Settings</strong> in OBS and complete the one-time Publisher Setup form,<br>
+       or edit <code>%APPDATA%\\StreamPlugins\\.env</code><br><br>
+       <small>${message}</small>`,
+    ));
   }
 }
 

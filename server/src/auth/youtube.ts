@@ -7,6 +7,7 @@ import {
   getRedirectUri,
   requireEnv,
 } from './oauth.js';
+import { reloadCredentials } from '../config/credentials.js';
 import { deleteTokens, getTokens, saveTokens, type StoredTokens } from './tokenStore.js';
 
 const GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
@@ -18,6 +19,7 @@ const YOUTUBE_SCOPES = [
 ].join(' ');
 
 export function youtubeLogin(_req: Request, res: Response): void {
+  reloadCredentials();
   try {
     const clientId = requireEnv('YOUTUBE_CLIENT_ID');
     const state = createState('youtube');
@@ -34,7 +36,10 @@ export function youtubeLogin(_req: Request, res: Response): void {
     res.redirect(`${GOOGLE_AUTH_URL}?${params}`);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'YouTube login failed';
-    res.status(500).send(authErrorHtml('YouTube not configured', `${message}. Add credentials to <code>%APPDATA%\\StreamPlugins\\.env</code> (see .env.example).`));
+    res.status(503).send(authErrorHtml(
+      'Publisher setup required',
+      `Complete the one-time Publisher Setup in StreamPlugins: Settings before users can connect YouTube.<br><br><small>${message}</small>`,
+    ));
   }
 }
 
