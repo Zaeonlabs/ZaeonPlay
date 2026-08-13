@@ -1,39 +1,42 @@
-/**
- * Configuration Store
- *
- * Reads and writes user configuration from ~/.streamplugins/config.json
- *
- * Config schema:
- * {
- *   server: { port: number },
- *   platforms: {
- *     twitch: { channelName: string, channelId: string },
- *     youtube: { channelId: string },
- *     kick: { channelSlug: string, channelId: number }
- *   },
- *   plugins: {
- *     metrics: { enabled: boolean, platforms: string[], interval: number },
- *     titleUpdater: { enabled: boolean },
- *     alerts: { enabled: boolean, duration: number, position: string },
- *     chat: { enabled: boolean, maxMessages: number, showTimestamps: boolean },
- *     discordLogger: { enabled: boolean }
- *   },
- *   discord: {
- *     chatWebhookUrl: string,
- *     eventsWebhookUrl: string,
- *     chatPlatforms: { twitch: boolean, youtube: boolean, kick: boolean },
- *     eventTypes: { subscriptions, follows, raids, bits, gifts: boolean },
- *     batchInterval: number
- *   },
- *   theme: 'dark' | 'light' | 'transparent' | 'amoled'
- * }
- */
+import fs from 'node:fs';
+import { getDataDir } from '../auth/tokenStore.js';
 
-// TODO: Implement config store
-// - loadConfig(): read and parse config file, merge with defaults
-// - saveConfig(config): write config to disk
-// - getConfigPath(): resolve ~/.streamplugins/config.json
-// - Default config values
-// - Config validation with schema
+export interface AppConfig {
+  theme: string;
+}
 
-export {};
+const DEFAULT_CONFIG: AppConfig = {
+  theme: 'dark',
+};
+
+function configPath(): string {
+  return `${getDataDir()}/config.json`;
+}
+
+function ensureDataDir(): void {
+  fs.mkdirSync(getDataDir(), { recursive: true });
+}
+
+export function loadConfig(): AppConfig {
+  ensureDataDir();
+  const file = configPath();
+  if (!fs.existsSync(file)) {
+    return { ...DEFAULT_CONFIG };
+  }
+  try {
+    return { ...DEFAULT_CONFIG, ...JSON.parse(fs.readFileSync(file, 'utf8')) };
+  } catch {
+    return { ...DEFAULT_CONFIG };
+  }
+}
+
+export function saveConfig(config: AppConfig): void {
+  ensureDataDir();
+  fs.writeFileSync(configPath(), JSON.stringify(config, null, 2), 'utf8');
+}
+
+export function mergeConfig(partial: Partial<AppConfig>): AppConfig {
+  const next = { ...loadConfig(), ...partial };
+  saveConfig(next);
+  return next;
+}

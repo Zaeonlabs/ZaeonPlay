@@ -1,10 +1,17 @@
-/**
- * Configuration Routes
- *
- * GET  /api/config     -> get current configuration
- * PUT  /api/config     -> update configuration (partial merge)
- */
+import { Router } from 'express';
+import { loadConfig, mergeConfig } from '../config/store.js';
 
-// TODO: Implement config routes
+export function createConfigRouter(): Router {
+  const router = Router();
 
-export {};
+  router.get('/', (_req, res) => {
+    res.json(loadConfig());
+  });
+
+  router.put('/', (req, res) => {
+    const partial = req.body ?? {};
+    res.json(mergeConfig(partial));
+  });
+
+  return router;
+}
