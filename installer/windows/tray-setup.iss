@@ -22,7 +22,7 @@
 
 #define MyAppName "StreamPlugins"
 #define MyAppPublisher "StreamPlugins Contributors"
-#define MyAppURL "https://github.com/StreamPlugins/StreamPlugins"
+#define MyAppURL "https://github.com/Zaeonlabs/ZaeonPlay"
 #define MyAppExeName "streamplugins-tray.exe"
 #define MyAppId "{{B7D4E2A9-1C6F-4A8B-8E3D-5F9A0C2B7D14}"
 
@@ -64,31 +64,31 @@ Name: "startupicon"; Description: "Start {#MyAppName} automatically when Windows
 
 [Files]
 Source: "{#SourceDir}\streamplugins-tray\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "scripts\*"; DestDir: "{app}\scripts"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
+Name: "{group}\{#MyAppName}"; Filename: "{app}\scripts\start-server.cmd"; WorkingDir: "{app}"
+Name: "{group}\Register OBS Docks"; Filename: "{app}\scripts\register-obs-docks.cmd"; WorkingDir: "{app}"
 Name: "{group}\Open Dashboard"; Filename: "http://localhost:3847/plugins/settings/"
 Name: "{group}\Uninstall {#MyAppName}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 Name: "{userstartup}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: startupicon
 
 [Run]
-Filename: "{app}\{#MyAppExeName}"; Description: "Launch {#MyAppName}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\scripts\start-server.cmd"; Description: "Start StreamPlugins Server"; Flags: nowait postinstall skipifsilent
 
 [Code]
 procedure CurStepChanged(CurStep: TSetupStep);
+var
+  ResultCode: Integer;
 begin
   if CurStep = ssPostInstall then
   begin
+    Exec('powershell.exe', '-NoProfile -ExecutionPolicy Bypass -File "' + ExpandConstant('{app}') + '\scripts\register-obs-docks.ps1"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
     MsgBox('{#MyAppName} was installed successfully.' + #13#10#13#10 +
-           '1. Launch StreamPlugins from the Start Menu (or system tray).' + #13#10 +
-           '2. Open the Settings page and connect Twitch / YouTube / Kick.' + #13#10 +
-           '3. In OBS, add Custom Browser Docks / Browser Sources:' + #13#10 +
-           '   http://localhost:3847/plugins/settings/' + #13#10 +
-           '   http://localhost:3847/plugins/title-updater/' + #13#10 +
-           '   http://localhost:3847/plugins/chat-widget/' + #13#10 +
-           '   http://localhost:3847/plugins/metrics-widget/' + #13#10 +
-           '   http://localhost:3847/plugins/alerts/',
+           '1. Use Start Menu > StreamPlugins > Start StreamPlugins Server before streaming.' + #13#10 +
+           '2. Open OBS and enable docks under View > Docks (StreamPlugins: ...).' + #13#10 +
+           '3. Open StreamPlugins: Settings to connect Twitch / YouTube / Kick.',
            mbInformation, MB_OK);
   end;
 end;

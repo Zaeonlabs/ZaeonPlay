@@ -24,7 +24,7 @@ jobs:
       - uses: ./.github/actions/stage-release-payload
         with:
           platform: windows
-          pkg_target: node22-win-x64
+          pkg_target: node18-win-x64
           server_bin: streamplugins-server.exe
           tray_bin: streamplugins-tray.exe
       - uses: actions/upload-artifact@v4
@@ -41,7 +41,7 @@ jobs:
       - uses: ./.github/actions/stage-release-payload
         with:
           platform: macos
-          pkg_target: node22-macos-x64
+          pkg_target: node18-macos-x64
           server_bin: streamplugins-server
           tray_bin: streamplugins-tray
       - uses: actions/upload-artifact@v4
@@ -58,7 +58,7 @@ jobs:
       - uses: ./.github/actions/stage-release-payload
         with:
           platform: linux
-          pkg_target: node22-linux-x64
+          pkg_target: node18-linux-x64
           server_bin: streamplugins-server
           tray_bin: streamplugins-tray
       - uses: actions/upload-artifact@v4

@@ -112,11 +112,13 @@ StreamPlugins includes 7 built-in themes: Dark, Light, Transparent, AMOLED, Midn
 ### Option A: Native OBS Plugin (Recommended)
 
 1. Download the latest installer from the [Releases](https://github.com/Zaeonlabs/ZaeonPlay/releases) page.
-2. Run the installer and follow the prompts. The installer detects your OBS installation directory automatically.
-3. Restart OBS Studio.
-4. Open **View > Docks** in OBS -- you will see new entries for each StreamPlugins panel.
-5. Open the **StreamPlugins Settings** dock to connect your Twitch, YouTube, Kick, and Discord accounts via OAuth.
-6. Enable the plugins you want and arrange the docks to your liking.
+2. **Fully quit OBS Studio**, then run the installer.
+3. The installer registers StreamPlugins under **View → Docks** and adds a **Start StreamPlugins Server** shortcut in the Start Menu.
+4. Before streaming, run **Start StreamPlugins Server** (OBS docks load pages from `http://localhost:3847`).
+5. Open OBS → **View → Docks** → enable the **StreamPlugins:** panels.
+6. Open **StreamPlugins: Settings** to connect Twitch, YouTube, Kick, and Discord.
+
+> **Note:** Auto-dock registration uses OBS Custom Browser Docks (not the native C++ plugin yet). If docks are missing after install, run **Register OBS Docks** from the Start Menu while OBS is closed, then restart OBS.
 
 ### Option B: Standalone / Development
 
@@ -127,7 +129,7 @@ npm install
 npm run dev
 ```
 
-The development server starts on `http://localhost:3847`. Add the following URLs as **Browser Docks** or **Browser Sources** in OBS:
+The development server starts on `http://localhost:3847`. In OBS, use **View → Docks → Custom Browser Docks** (or run `installer\windows\scripts\register-obs-docks.cmd` while OBS is closed to add them automatically), then enable:
 
 | Plugin | URL |
 |--------|-----|

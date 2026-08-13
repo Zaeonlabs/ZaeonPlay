@@ -24,7 +24,7 @@
 
 #define MyAppName "StreamPlugins"
 #define MyAppPublisher "StreamPlugins Contributors"
-#define MyAppURL "https://github.com/StreamPlugins/StreamPlugins"
+#define MyAppURL "https://github.com/Zaeonlabs/ZaeonPlay"
 #define MyAppId "{{A3F2C8E1-7B4D-4E9A-9C1F-2D8E6B5A4C03}"
 
 [Setup]
@@ -59,7 +59,7 @@ RestartApplications=no
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Messages]
-WelcomeLabel2=This will install [name/ver] into your OBS Studio plugins folder.%n%nAfter installation, fully quit and restart OBS Studio. The StreamPlugins docks will appear under the Docks menu.%n%nMake sure OBS Studio is closed before continuing.
+WelcomeLabel2=This will install StreamPlugins into your OBS Studio plugins folder.%n%nThe installer will register browser docks in OBS and add a Start Menu shortcut to run the local server.%n%nMake sure OBS Studio is fully closed before continuing.
 
 [Files]
 ; Native plugin binary
@@ -68,7 +68,12 @@ Source: "{#SourceDir}\streamplugins\bin\64bit\*"; DestDir: "{app}\bin\64bit"; Fl
 ; Bundled server + plugin frontends + locale
 Source: "{#SourceDir}\streamplugins\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
 
+; Setup / launcher scripts
+Source: "scripts\*"; DestDir: "{app}\scripts"; Flags: ignoreversion recursesubdirs createallsubdirs
+
 [Icons]
+Name: "{group}\Start StreamPlugins Server"; Filename: "{app}\scripts\start-server.cmd"; WorkingDir: "{app}"
+Name: "{group}\Register OBS Docks"; Filename: "{app}\scripts\register-obs-docks.cmd"; WorkingDir: "{app}"
 Name: "{group}\Uninstall {#MyAppName} OBS Plugin"; Filename: "{uninstallexe}"
 
 [Code]
@@ -91,13 +96,18 @@ begin
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
+var
+  ResultCode: Integer;
 begin
   if CurStep = ssPostInstall then
   begin
+    Exec('powershell.exe', '-NoProfile -ExecutionPolicy Bypass -File "' + ExpandConstant('{app}') + '\scripts\register-obs-docks.ps1"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Exec('powershell.exe', '-NoProfile -ExecutionPolicy Bypass -File "' + ExpandConstant('{app}') + '\scripts\start-server.ps1" -InstallRoot "' + ExpandConstant('{app}') + '"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
     MsgBox('{#MyAppName} was installed successfully.' + #13#10#13#10 +
-           '1. Fully quit OBS Studio if it is running.' + #13#10 +
-           '2. Restart OBS Studio.' + #13#10 +
-           '3. Open Docks > StreamPlugins: Settings to connect your accounts.',
+           '1. Open OBS Studio (or restart it if it was open).' + #13#10 +
+           '2. Go to View > Docks and enable the StreamPlugins panels.' + #13#10 +
+           '3. Before each stream, run Start Menu > StreamPlugins > Start StreamPlugins Server.' + #13#10 +
+           '4. Open StreamPlugins: Settings to connect your accounts.',
            mbInformation, MB_OK);
   end;
 end;
