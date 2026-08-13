@@ -3,7 +3,8 @@
 
 param(
   [string]$BaseUrl = "http://localhost:3847",
-  [string]$ObsConfigDir = "$env:APPDATA\obs-studio"
+  [string]$ObsConfigDir = "$env:APPDATA\obs-studio",
+  [switch]$Force
 )
 
 $ErrorActionPreference = "Stop"
@@ -72,7 +73,8 @@ function Update-ObsIniFile([string]$iniPath, [object[]]$incomingDocks) {
     $text += "[BasicWindow]`r`nExtraBrowserDocks=$json`r`n"
   }
 
-  Set-Content -Path $iniPath -Value $text -Encoding UTF8
+  $utf8NoBom = New-Object System.Text.UTF8Encoding $false
+  [System.IO.File]::WriteAllText($iniPath, $text, $utf8NoBom)
   Write-Host "Updated $iniPath with $($merged.Count) browser dock(s)."
 }
 
@@ -81,8 +83,8 @@ if (-not (Test-Path $ObsConfigDir)) {
 }
 
 $obs = Get-Process -Name obs64, obs32 -ErrorAction SilentlyContinue
-if ($obs) {
-  throw "OBS Studio is running. Fully quit OBS, then run this script again."
+if ($obs -and -not $Force) {
+  throw "OBS Studio is running (PID $($obs.Id -join ', ')). Fully quit OBS from the system tray, then run this script again."
 }
 
 $docks = Get-StreamPluginsDocks $BaseUrl
