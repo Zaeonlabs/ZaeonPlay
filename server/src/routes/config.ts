@@ -9,7 +9,7 @@ export function createConfigRouter(): Router {
   });
 
   router.put('/', (req, res) => {
-    const partial = req.body ?? {};
+    const partial = (req.body ?? {}) as Record<string, unknown>;
     res.json(mergeConfig(partial));
   });
 

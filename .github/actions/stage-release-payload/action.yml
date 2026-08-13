@@ -116,3 +116,23 @@ runs:
           cp native-plugin/data/locale/en-US.ini dist/obs-plugin-linux/streamplugins/data/locale/
           chmod +x dist/obs-plugin-linux/streamplugins/data/server/streamplugins-server
         fi
+
+    - name: Ship OAuth config template with install payloads
+      shell: bash
+      run: |
+        if [[ ! -f .env.example ]]; then
+          echo "No .env.example found; skipping OAuth template copy"
+          exit 0
+        fi
+        if [[ "${{ inputs.platform }}" == "windows" ]]; then
+          cp .env.example dist/obs-plugin-windows/streamplugins/data/.env
+          cp .env.example dist/tray-app-windows/streamplugins-tray/.env
+        fi
+        if [[ "${{ inputs.platform }}" == "macos" ]]; then
+          cp .env.example dist/obs-plugin-macos/streamplugins.plugin/Contents/Resources/data/.env
+          cp .env.example dist/tray-app-macos/StreamPlugins.app/Contents/Resources/.env
+        fi
+        if [[ "${{ inputs.platform }}" == "linux" ]]; then
+          cp .env.example dist/obs-plugin-linux/streamplugins/data/.env
+          cp .env.example dist/tray-app-linux/.env
+        fi

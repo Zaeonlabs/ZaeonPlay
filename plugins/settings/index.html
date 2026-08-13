@@ -166,6 +166,17 @@
 
     /* ---------- Auth status ---------- */
     async function connectPlatform(platform) {
+      const btn = document.getElementById(`${platform}-connect`);
+      if (btn.textContent.trim() === 'Disconnect') {
+        try {
+          await StreamPluginsAPI.post(`/auth/${platform}/disconnect`, {});
+          showToast(`${platform} disconnected`, 'success');
+          await loadAuthStatus();
+        } catch {
+          showToast(`Failed to disconnect ${platform}`, 'error');
+        }
+        return;
+      }
       window.open(`http://localhost:3847/auth/${platform}/login`, '_blank');
     }
 
@@ -181,6 +192,13 @@
             userEl.textContent = status[platform].displayName || 'Connected';
             btn.textContent = 'Disconnect';
             btn.className = 'sp-btn sp-btn-secondary sp-btn-sm';
+            btn.onclick = () => connectPlatform(platform);
+          } else {
+            dot.className = 'sp-dot sp-dot--off';
+            userEl.textContent = 'Not connected';
+            btn.textContent = 'Connect';
+            btn.className = 'sp-btn sp-btn-primary sp-btn-sm';
+            btn.onclick = () => connectPlatform(platform);
           }
         }
       } catch (_) {}
