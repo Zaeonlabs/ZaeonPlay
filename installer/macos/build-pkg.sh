@@ -48,7 +48,6 @@ mkdir -p "${OUTPUT_DIR}"
 STAGE_DIR="$(mktemp -d)"
 PAYLOAD_DIR="${STAGE_DIR}/payload"
 SCRIPTS_DIR="${STAGE_DIR}/scripts"
-COMPONENT_PKG="${STAGE_DIR}/component.pkg"
 
 cleanup() {
   rm -rf "${STAGE_DIR}"
@@ -128,68 +127,13 @@ EOF
   OUTPUT_NAME="streamplugins-${VERSION}-tray-app-macos-universal.pkg"
 fi
 
-echo "[macOS pkg] Building component package (${VARIANT})..."
+echo "[macOS pkg] Building package (${VARIANT})..."
 pkgbuild \
   --root "${PAYLOAD_DIR}" \
   --scripts "${SCRIPTS_DIR}" \
   --identifier "${IDENTIFIER}" \
   --version "${VERSION}" \
   --install-location "${INSTALL_LOCATION}" \
-  "${COMPONENT_PKG}"
-
-# Distribution XML for productbuild
-DIST_XML="${STAGE_DIR}/distribution.xml"
-cat > "${DIST_XML}" <<EOF
-<?xml version="1.0" encoding="utf-8"?>
-<installer-gui-script minSpecVersion="2">
-  <title>StreamPlugins ${VERSION}</title>
-  <organization>${IDENTIFIER_BASE}</organization>
-  <domains enable_localSystem="true"/>
-  <options customize="never" require-scripts="false" rootVolumeOnly="true"/>
-  <welcome file="welcome.html" mime-type="text/html"/>
-  <pkg-ref id="${IDENTIFIER}"/>
-  <choices-outline>
-    <line choice="default">
-      <line choice="${IDENTIFIER}"/>
-    </line>
-  </choices-outline>
-  <choice id="default"/>
-  <choice id="${IDENTIFIER}" visible="false">
-    <pkg-ref id="${IDENTIFIER}"/>
-  </choice>
-  <pkg-ref id="${IDENTIFIER}" version="${VERSION}" onConclusion="none">${COMPONENT_PKG##*/}</pkg-ref>
-</installer-gui-script>
-EOF
-
-# Simple welcome HTML
-RESOURCES_DIR="${STAGE_DIR}/resources"
-mkdir -p "${RESOURCES_DIR}"
-if [[ "${VARIANT}" == "obs-plugin" ]]; then
-  cat > "${RESOURCES_DIR}/welcome.html" <<EOF
-<html><body>
-<h2>StreamPlugins OBS Plugin</h2>
-<p>Installs into your OBS Studio plugins folder.</p>
-<p>After installing, fully quit and restart OBS. Open <b>Docks &gt; StreamPlugins: Settings</b> to connect accounts.</p>
-</body></html>
-EOF
-else
-  cat > "${RESOURCES_DIR}/welcome.html" <<EOF
-<html><body>
-<h2>StreamPlugins Tray App</h2>
-<p>Installs StreamPlugins.app to Applications.</p>
-<p>Launch the app, then add OBS Browser Docks pointing to <code>http://localhost:3847/plugins/...</code></p>
-</body></html>
-EOF
-fi
-
-echo "[macOS pkg] Building product archive..."
-# Copy component into stage so productbuild can find it by relative name
-cp "${COMPONENT_PKG}" "${STAGE_DIR}/${COMPONENT_PKG##*/}"
-
-productbuild \
-  --distribution "${DIST_XML}" \
-  --resources "${RESOURCES_DIR}" \
-  --package-path "${STAGE_DIR}" \
   "${OUTPUT_DIR}/${OUTPUT_NAME}"
 
 echo "[macOS pkg] Created ${OUTPUT_DIR}/${OUTPUT_NAME}"

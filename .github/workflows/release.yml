@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -13,145 +14,56 @@ env:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Build Node server + stage plugin assets on each OS
+  # Build + stage payloads independently per OS (one failure won't block others)
   # ---------------------------------------------------------------------------
-  build-server:
-    name: Build server (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: windows-latest
-            platform: windows
-            pkg_target: node22-win-x64
-            server_bin: streamplugins-server.exe
-            tray_bin: streamplugins-tray.exe
-          - os: macos-latest
-            platform: macos
-            pkg_target: node22-macos-x64
-            server_bin: streamplugins-server
-            tray_bin: streamplugins-tray
-          - os: ubuntu-latest
-            platform: linux
-            pkg_target: node22-linux-x64
-            server_bin: streamplugins-server
-            tray_bin: streamplugins-tray
-
+  build-windows:
+    name: Build server (windows)
+    runs-on: windows-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/stage-release-payload
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build server
-        run: npm run build
-
-      - name: Install pkg
-        run: npm install -g pkg
-
-      - name: Package server binary
-        shell: bash
-        run: |
-          mkdir -p dist/bin
-          # Package compiled server entry if present; fall back to TS entry via tsx bundle
-          if [ -f server/dist/index.js ]; then
-            ENTRY=server/dist/index.js
-          else
-            ENTRY=server/src/index.ts
-          fi
-          pkg "$ENTRY" \
-            --targets ${{ matrix.pkg_target }} \
-            --output "dist/bin/${{ matrix.server_bin }}" \
-            || {
-              echo "pkg packaging failed or entry incomplete; creating placeholder binary stub for CI scaffolding"
-              if [[ "${{ matrix.platform }}" == "windows" ]]; then
-                printf 'MZ' > "dist/bin/${{ matrix.server_bin }}"
-              else
-                printf '#!/bin/sh\necho "StreamPlugins server placeholder"\n' > "dist/bin/${{ matrix.server_bin }}"
-                chmod +x "dist/bin/${{ matrix.server_bin }}"
-              fi
-            }
-
-      - name: Stage tray-app payload
-        shell: bash
-        run: |
-          mkdir -p "dist/tray-app-${{ matrix.platform }}"
-          cp "dist/bin/${{ matrix.server_bin }}" "dist/tray-app-${{ matrix.platform }}/"
-          cp -R plugins "dist/tray-app-${{ matrix.platform }}/plugins"
-          # Tray binary: until tray-app is fully implemented, alias server as tray launcher stub
-          cp "dist/bin/${{ matrix.server_bin }}" "dist/tray-app-${{ matrix.platform }}/${{ matrix.tray_bin }}"
-          if [[ "${{ matrix.platform }}" == "macos" ]]; then
-            mkdir -p dist/tray-app-macos/StreamPlugins.app/Contents/MacOS
-            mkdir -p dist/tray-app-macos/StreamPlugins.app/Contents/Resources/plugins
-            cp "dist/bin/${{ matrix.server_bin }}" dist/tray-app-macos/StreamPlugins.app/Contents/MacOS/StreamPlugins
-            cp -R plugins/. dist/tray-app-macos/StreamPlugins.app/Contents/Resources/plugins/
-            cp installer/macos/Info.plist dist/tray-app-macos/StreamPlugins.app/Contents/Info.plist
-          fi
-          if [[ "${{ matrix.platform }}" == "windows" ]]; then
-            mkdir -p dist/tray-app-windows/streamplugins-tray
-            cp "dist/bin/${{ matrix.server_bin }}" dist/tray-app-windows/streamplugins-tray/streamplugins-server.exe
-            cp "dist/bin/${{ matrix.server_bin }}" dist/tray-app-windows/streamplugins-tray/streamplugins-tray.exe
-            cp -R plugins dist/tray-app-windows/streamplugins-tray/plugins
-          fi
-          if [[ "${{ matrix.platform }}" == "linux" ]]; then
-            mkdir -p dist/tray-app-linux
-            cp "dist/bin/${{ matrix.server_bin }}" dist/tray-app-linux/streamplugins-server
-            cp "dist/bin/${{ matrix.server_bin }}" dist/tray-app-linux/streamplugins-tray
-            cp -R plugins dist/tray-app-linux/plugins
-            chmod +x dist/tray-app-linux/streamplugins-server dist/tray-app-linux/streamplugins-tray
-          fi
-
-      - name: Stage OBS plugin payload (data + server; native binary optional)
-        shell: bash
-        run: |
-          # Native C++ binary is produced when OBS SDK build is available.
-          # Always stage data/server + plugins so installer scripts can run.
-          if [[ "${{ matrix.platform }}" == "windows" ]]; then
-            mkdir -p dist/obs-plugin-windows/streamplugins/bin/64bit
-            mkdir -p dist/obs-plugin-windows/streamplugins/data/server
-            mkdir -p dist/obs-plugin-windows/streamplugins/data/plugins
-            mkdir -p dist/obs-plugin-windows/streamplugins/data/locale
-            # Placeholder DLL so installer packaging can proceed without OBS SDK in this job
-            printf 'PE' > dist/obs-plugin-windows/streamplugins/bin/64bit/streamplugins.dll
-            cp "dist/bin/${{ matrix.server_bin }}" dist/obs-plugin-windows/streamplugins/data/server/streamplugins-server.exe
-            cp -R plugins/. dist/obs-plugin-windows/streamplugins/data/plugins/
-            cp native-plugin/data/locale/en-US.ini dist/obs-plugin-windows/streamplugins/data/locale/
-          fi
-          if [[ "${{ matrix.platform }}" == "macos" ]]; then
-            mkdir -p dist/obs-plugin-macos/streamplugins.plugin/Contents/MacOS
-            mkdir -p dist/obs-plugin-macos/streamplugins.plugin/Contents/Resources/data/server
-            mkdir -p dist/obs-plugin-macos/streamplugins.plugin/Contents/Resources/data/plugins
-            mkdir -p dist/obs-plugin-macos/streamplugins.plugin/Contents/Resources/data/locale
-            printf 'PLACEHOLDER' > dist/obs-plugin-macos/streamplugins.plugin/Contents/MacOS/streamplugins
-            cp "dist/bin/${{ matrix.server_bin }}" dist/obs-plugin-macos/streamplugins.plugin/Contents/Resources/data/server/streamplugins-server
-            cp -R plugins/. dist/obs-plugin-macos/streamplugins.plugin/Contents/Resources/data/plugins/
-            cp native-plugin/data/locale/en-US.ini dist/obs-plugin-macos/streamplugins.plugin/Contents/Resources/data/locale/
-            chmod +x dist/obs-plugin-macos/streamplugins.plugin/Contents/Resources/data/server/streamplugins-server
-          fi
-          if [[ "${{ matrix.platform }}" == "linux" ]]; then
-            mkdir -p dist/obs-plugin-linux/streamplugins/bin/64bit
-            mkdir -p dist/obs-plugin-linux/streamplugins/data/server
-            mkdir -p dist/obs-plugin-linux/streamplugins/data/plugins
-            mkdir -p dist/obs-plugin-linux/streamplugins/data/locale
-            printf 'PLACEHOLDER' > dist/obs-plugin-linux/streamplugins/bin/64bit/streamplugins.so
-            cp "dist/bin/${{ matrix.server_bin }}" dist/obs-plugin-linux/streamplugins/data/server/streamplugins-server
-            cp -R plugins/. dist/obs-plugin-linux/streamplugins/data/plugins/
-            cp native-plugin/data/locale/en-US.ini dist/obs-plugin-linux/streamplugins/data/locale/
-            chmod +x dist/obs-plugin-linux/streamplugins/data/server/streamplugins-server
-          fi
-
-      - name: Upload staged payloads
-        uses: actions/upload-artifact@v4
+          platform: windows
+          pkg_target: node22-win-x64
+          server_bin: streamplugins-server.exe
+          tray_bin: streamplugins-tray.exe
+      - uses: actions/upload-artifact@v4
         with:
-          name: staged-${{ matrix.platform }}
+          name: staged-windows
+          path: dist/
+          if-no-files-found: error
+
+  build-macos:
+    name: Build server (macos)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/stage-release-payload
+        with:
+          platform: macos
+          pkg_target: node22-macos-x64
+          server_bin: streamplugins-server
+          tray_bin: streamplugins-tray
+      - uses: actions/upload-artifact@v4
+        with:
+          name: staged-macos
+          path: dist/
+          if-no-files-found: error
+
+  build-linux:
+    name: Build server (linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/stage-release-payload
+        with:
+          platform: linux
+          pkg_target: node22-linux-x64
+          server_bin: streamplugins-server
+          tray_bin: streamplugins-tray
+      - uses: actions/upload-artifact@v4
+        with:
+          name: staged-linux
           path: dist/
           if-no-files-found: error
 
@@ -160,14 +72,12 @@ jobs:
   # ---------------------------------------------------------------------------
   package-windows:
     name: Package Windows installers
-    needs: build-server
+    needs: build-windows
     runs-on: windows-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Download staged payload
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: staged-windows
           path: dist
@@ -182,26 +92,28 @@ jobs:
 
       - name: Install Inno Setup
         shell: powershell
-        run: |
-          choco install innosetup -y --no-progress
-          echo "C:\Program Files (x86)\Inno Setup 6" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        run: choco install innosetup -y --no-progress
 
-      - name: Build OBS plugin installer
-        shell: cmd
-        run: |
-          iscc /DMyAppVersion=%VERSION% /DSourceDir=..\..\dist\obs-plugin-windows installer\windows\setup.iss
+      - name: Build Windows installers
+        shell: pwsh
         env:
           VERSION: ${{ steps.ver.outputs.version }}
-
-      - name: Build tray app installer
-        shell: cmd
         run: |
-          iscc /DMyAppVersion=%VERSION% /DSourceDir=..\..\dist\tray-app-windows installer\windows\tray-setup.iss
-        env:
-          VERSION: ${{ steps.ver.outputs.version }}
+          $root = $env:GITHUB_WORKSPACE
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) {
+            throw "Inno Setup compiler not found at $iscc"
+          }
+          New-Item -ItemType Directory -Force -Path "$root\dist\installers" | Out-Null
+          $common = @(
+            "/DMyAppVersion=$env:VERSION",
+            "/O$root\dist\installers"
+          )
+          & $iscc @common "/DSourceDir=$root\dist\obs-plugin-windows" "$root\installer\windows\setup.iss"
+          & $iscc @common "/DSourceDir=$root\dist\tray-app-windows" "$root\installer\windows\tray-setup.iss"
+          Get-ChildItem "$root\dist\installers" | Format-Table Name, Length
 
-      - name: Upload Windows installers
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: installers-windows
           path: dist/installers/*
@@ -209,14 +121,13 @@ jobs:
 
   package-macos:
     name: Package macOS installers
-    needs: build-server
+    needs: build-macos
     runs-on: macos-latest
+    continue-on-error: true
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Download staged payload
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: staged-macos
           path: dist
@@ -228,17 +139,14 @@ jobs:
           VERSION="${TAG#v}"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
-      - name: Make build script executable
-        run: chmod +x installer/macos/build-pkg.sh
+      - name: Build macOS installers
+        run: |
+          chmod +x installer/macos/build-pkg.sh
+          ./installer/macos/build-pkg.sh --variant=obs-plugin --version=${{ steps.ver.outputs.version }}
+          ./installer/macos/build-pkg.sh --variant=tray-app --version=${{ steps.ver.outputs.version }}
+          ls -la dist/installers
 
-      - name: Build OBS plugin pkg
-        run: ./installer/macos/build-pkg.sh --variant=obs-plugin --version=${{ steps.ver.outputs.version }}
-
-      - name: Build tray app pkg
-        run: ./installer/macos/build-pkg.sh --variant=tray-app --version=${{ steps.ver.outputs.version }}
-
-      - name: Upload macOS installers
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: installers-macos
           path: dist/installers/*
@@ -246,14 +154,13 @@ jobs:
 
   package-linux:
     name: Package Linux installers
-    needs: build-server
+    needs: build-linux
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Download staged payload
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: staged-linux
           path: dist
@@ -265,39 +172,56 @@ jobs:
           VERSION="${TAG#v}"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
-      - name: Make build script executable
-        run: chmod +x installer/linux/build-deb.sh
+      - name: Build Linux installers
+        run: |
+          chmod +x installer/linux/build-deb.sh
+          ./installer/linux/build-deb.sh --variant=obs-plugin --version=${{ steps.ver.outputs.version }}
+          ./installer/linux/build-deb.sh --variant=tray-app --version=${{ steps.ver.outputs.version }}
+          ls -la dist/installers
 
-      - name: Build OBS plugin deb
-        run: ./installer/linux/build-deb.sh --variant=obs-plugin --version=${{ steps.ver.outputs.version }}
-
-      - name: Build tray app deb
-        run: ./installer/linux/build-deb.sh --variant=tray-app --version=${{ steps.ver.outputs.version }}
-
-      - name: Upload Linux installers
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: installers-linux
           path: dist/installers/*
           if-no-files-found: error
 
   # ---------------------------------------------------------------------------
-  # Publish GitHub Release with all 6 artifacts
+  # Publish GitHub Release (publishes whatever platform packages succeeded)
   # ---------------------------------------------------------------------------
   release:
     name: Create GitHub Release
     needs: [package-windows, package-macos, package-linux]
+    if: >-
+      always() &&
+      (
+        needs.package-windows.result == 'success' ||
+        needs.package-macos.result == 'success' ||
+        needs.package-linux.result == 'success'
+      )
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Download all installers
+      - name: Download Windows installers
+        if: needs.package-windows.result == 'success'
         uses: actions/download-artifact@v4
         with:
-          pattern: installers-*
+          name: installers-windows
           path: release-assets
-          merge-multiple: true
+
+      - name: Download macOS installers
+        if: needs.package-macos.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: installers-macos
+          path: release-assets
+
+      - name: Download Linux installers
+        if: needs.package-linux.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: installers-linux
+          path: release-assets
 
       - name: List release assets
         run: find release-assets -type f | sort
@@ -307,14 +231,14 @@ jobs:
         with:
           draft: false
           generate_release_notes: true
-          files: release-assets/*
+          files: release-assets/**
           body: |
             ## StreamPlugins ${{ github.ref_name }}
 
             ### Install options
 
             **Native OBS Plugin (recommended)** — install, restart OBS, docks appear automatically:
-            - Windows: `streamplugins-*-obs-plugin-windows-x64.exe` (or `.zip` if packaged that way)
+            - Windows: `streamplugins-*-obs-plugin-windows-x64.exe`
             - macOS: `streamplugins-*-obs-plugin-macos-universal.pkg`
             - Linux: `streamplugins-*-obs-plugin-linux-x86_64.deb`
 
