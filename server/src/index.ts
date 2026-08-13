@@ -54,12 +54,13 @@ app.get('/health', (_req, res) => {
 });
 
 app.listen(PORT, '127.0.0.1', () => {
+  const credentialsFile = loadCredentials();
   console.log(`[StreamPlugins] Server running at http://localhost:${PORT}`);
   console.log(`[StreamPlugins] Data directory: ${getDataDir()}`);
   if (credentialsFile) {
     console.log(`[StreamPlugins] Loaded credentials from ${credentialsFile}`);
   } else {
-    console.log('[StreamPlugins] No .env found — add publisher OAuth keys to %APPDATA%\\StreamPlugins\\.env');
+    console.log('[StreamPlugins] No publisher keys yet — use Settings dock Publisher Setup form');
   }
   console.log(`[StreamPlugins] Serving plugins from ${pluginsDir}`);
 });
