@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — ZaeonPlay</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="container legal">
+    <a class="back" href="index.html">&larr; ZaeonPlay</a>
+    <h1>Privacy Policy</h1>
+    <p class="meta">Effective date: August 14, 2026 &middot; Last updated: August 14, 2026</p>
+
+    <p>
+      This Privacy Policy describes how <strong>Zaeonlabs</strong> (“we”, “us”, “our”) handles information
+      in connection with <strong>ZaeonPlay</strong> (also known as <strong>StreamPlugins</strong>), an
+      open-source desktop application for OBS Studio.
+    </p>
+
+    <h2>Summary</h2>
+    <p>
+      ZaeonPlay runs on your computer. We do not operate a cloud backend that stores your stream data.
+      We do not sell your personal information. We do not use analytics or advertising trackers in the application.
+    </p>
+
+    <h2>Information We Do Not Collect</h2>
+    <p>ZaeonPlay does not collect, transmit, or store on our servers:</p>
+    <ul>
+      <li>Chat messages, alerts, or stream metrics</li>
+      <li>OBS scenes, sources, or recordings</li>
+      <li>Analytics, telemetry, or crash reports</li>
+      <li>Payment or donation details processed by third-party providers</li>
+    </ul>
+
+    <h2>Information Stored on Your Device</h2>
+    <p>When you use ZaeonPlay, the following may be stored locally on your computer:</p>
+    <ul>
+      <li><strong>OAuth tokens</strong> for Twitch, YouTube, and Kick (after you click Connect)</li>
+      <li><strong>Application settings</strong> (themes, goals, alert preferences, Discord webhook URLs you configure)</li>
+      <li><strong>Publisher credentials</strong> (OAuth client ID and secret), if you configure them for development or self-hosting</li>
+    </ul>
+    <p>
+      On Windows, data is typically stored under <code>%APPDATA%\StreamPlugins</code>.
+      Tokens are intended to remain on your device and are used only to call platform APIs on your behalf.
+    </p>
+
+    <h2>Local Server</h2>
+    <p>
+      ZaeonPlay includes a local server that binds to <code>127.0.0.1</code> (localhost) only.
+      It is not designed to accept connections from other devices on your network or from the public internet,
+      except where you explicitly configure optional webhook tunnels for donation integrations.
+    </p>
+
+    <h2>Third-Party Services</h2>
+    <p>When you connect accounts or configure integrations, your device communicates directly with:</p>
+    <ul>
+      <li><strong>Twitch</strong> — <a href="https://www.twitch.tv/p/legal/privacy-notice/">Privacy Notice</a></li>
+      <li><strong>YouTube / Google</strong> — <a href="https://policies.google.com/privacy">Google Privacy Policy</a></li>
+      <li><strong>Kick</strong> — <a href="https://kick.com/privacy-policy">Privacy Policy</a></li>
+      <li><strong>Discord</strong> — if you configure webhooks — <a href="https://discord.com/privacy">Privacy Policy</a></li>
+      <li><strong>Payment providers</strong> (e.g. Stripe, PayPal, Ko-fi) — if you configure donation webhooks</li>
+    </ul>
+    <p>
+      OAuth sign-in happens in your browser. Google, Twitch, or Kick may show you their own consent screens.
+      We receive OAuth tokens only on your local machine via the redirect to <code>localhost</code>.
+    </p>
+
+    <h2>Publisher OAuth Application</h2>
+    <p>
+      Zaeonlabs may register developer applications with Twitch, Google (YouTube), and Kick so that
+      end users can authorize ZaeonPlay without creating their own API keys. When you click Connect,
+      you authorize our OAuth application to access the scopes shown on the platform’s consent screen.
+      We do not receive your platform passwords.
+    </p>
+
+    <h2>GitHub</h2>
+    <p>
+      Source code and release downloads are hosted on GitHub. Use of GitHub is subject to
+      <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub’s privacy statement</a>.
+      Downloading releases or viewing this website does not grant us access to your streaming accounts.
+    </p>
+
+    <h2>Children’s Privacy</h2>
+    <p>
+      ZaeonPlay is not directed at children under 13 (or the minimum age required in your jurisdiction).
+      We do not knowingly collect personal information from children.
+    </p>
+
+    <h2>Data Retention and Deletion</h2>
+    <p>
+      Data remains on your device until you delete it. You can disconnect platforms in the Settings dock,
+      uninstall the application, or delete the StreamPlugins data folder to remove local tokens and configuration.
+    </p>
+
+    <h2>Security</h2>
+    <p>
+      We design ZaeonPlay to keep credentials server-side within the local application and not expose
+      OAuth tokens to OBS browser docks. No security measure is perfect; you are responsible for
+      securing your computer and accounts.
+    </p>
+
+    <h2>International Users</h2>
+    <p>
+      ZaeonPlay is developed by Zaeonlabs. Platform APIs you connect to may process data in other countries
+      according to their own policies.
+    </p>
+
+    <h2>Changes to This Policy</h2>
+    <p>
+      We may update this policy from time to time. The “Last updated” date at the top will change when we do.
+      Continued use of ZaeonPlay after changes constitutes acceptance of the updated policy.
+    </p>
+
+    <h2>Contact</h2>
+    <p>
+      Questions about this Privacy Policy:<br>
+      <a href="mailto:lushhorizon.icy@gmail.com">lushhorizon.icy@gmail.com</a><br>
+      <a href="https://github.com/Zaeonlabs/ZaeonPlay/issues">GitHub Issues</a>
+    </p>
+
+    <footer>
+      <p><a href="terms-of-service.html">Terms of Service</a> &middot; <a href="index.html">Home</a></p>
+    </footer>
+  </main>
+</body>
+</html>
