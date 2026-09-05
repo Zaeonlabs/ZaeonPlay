@@ -1,36 +1,60 @@
 # Registers StreamPlugins browser docks in OBS Studio (user.ini).
-# Safe to run multiple times; merges by URL without duplicating entries.
+# Safe to run multiple times. Defaults to registering ONLY the primary Control Panel dock
+# to prevent OBS from popping open 9 windows simultaneously on startup.
 
 param(
   [string]$BaseUrl = "http://localhost:3847",
   [string]$ObsConfigDir = "$env:APPDATA\obs-studio",
+  [string]$Mode = "PrimaryOnly", # Options: "PrimaryOnly", "AllDocks", "Clean"
   [switch]$Force
 )
 
 $ErrorActionPreference = "Stop"
 
-function Get-StreamPluginsDocks([string]$base) {
+function Get-StreamPluginsDocks([string]$base, [string]$selectionMode) {
   $base = $base.TrimEnd("/")
-  @(
-    @{ title = "StreamPlugins: Settings";         url = "$base/plugins/settings/";                    uuid = "A3F2C8E17B4D4E9A9C1F2D8E6B5A001" }
-    @{ title = "StreamPlugins: Metrics";          url = "$base/plugins/metrics-widget/";            uuid = "A3F2C8E17B4D4E9A9C1F2D8E6B5A002" }
-    @{ title = "StreamPlugins: Title Updater";    url = "$base/plugins/title-updater/";             uuid = "A3F2C8E17B4D4E9A9C1F2D8E6B5A003" }
-    @{ title = "StreamPlugins: Chat";             url = "$base/plugins/chat-widget/";               uuid = "A3F2C8E17B4D4E9A9C1F2D8E6B5A004" }
-    @{ title = "StreamPlugins: Alerts";           url = "$base/plugins/alerts/";                    uuid = "A3F2C8E17B4D4E9A9C1F2D8E6B5A005" }
-    @{ title = "StreamPlugins: Discord";          url = "$base/plugins/discord-logger/settings.html"; uuid = "A3F2C8E17B4D4E9A9C1F2D8E6B5A006" }
-    @{ title = "StreamPlugins: Goal Bars";        url = "$base/plugins/goal-bars/settings.html";    uuid = "A3F2C8E17B4D4E9A9C1F2D8E6B5A007" }
-    @{ title = "StreamPlugins: Donations";         url = "$base/plugins/donation-alerts/settings.html"; uuid = "A3F2C8E17B4D4E9A9C1F2D8E6B5A008" }
+  
+  $all = @(
+    @{ title = "StreamPlugins: Settings";         url = "$base/plugins/settings/";                    uuid = "A3F2C8E17B4D4E9A9C1F2D8E6B5A001" },
+    @{ title = "StreamPlugins: Metrics";          url = "$base/plugins/metrics-widget/";            uuid = "A3F2C8E17B4D4E9A9C1F2D8E6B5A002" },
+    @{ title = "StreamPlugins: Title Updater";    url = "$base/plugins/title-updater/";             uuid = "A3F2C8E17B4D4E9A9C1F2D8E6B5A003" },
+    @{ title = "StreamPlugins: Chat";             url = "$base/plugins/chat-widget/";               uuid = "A3F2C8E17B4D4E9A9C1F2D8E6B5A004" },
+    @{ title = "StreamPlugins: Alerts";           url = "$base/plugins/alerts/";                    uuid = "A3F2C8E17B4D4E9A9C1F2D8E6B5A005" },
+    @{ title = "StreamPlugins: Discord";          url = "$base/plugins/discord-logger/settings.html"; uuid = "A3F2C8E17B4D4E9A9C1F2D8E6B5A006" },
+    @{ title = "StreamPlugins: Goal Bars";        url = "$base/plugins/goal-bars/settings.html";    uuid = "A3F2C8E17B4D4E9A9C1F2D8E6B5A007" },
+    @{ title = "StreamPlugins: Donations";         url = "$base/plugins/donation-alerts/settings.html"; uuid = "A3F2C8E17B4D4E9A9C1F2D8E6B5A008" },
     @{ title = "StreamPlugins: Scene Reactions";  url = "$base/plugins/scene-reactions/";           uuid = "A3F2C8E17B4D4E9A9C1F2D8E6B5A009" }
   )
+
+  if ($selectionMode -eq "Clean") {
+    return @()
+  }
+
+  if ($selectionMode -eq "PrimaryOnly") {
+    # Only register Settings / Dashboard dock by default so OBS opens cleanly
+    return @($all[0])
+  }
+
+  return $all
 }
 
-function Merge-Docks([object[]]$existing, [object[]]$incoming) {
+function Clean-And-Merge-Docks([object[]]$existing, [object[]]$incoming) {
   $merged = New-Object System.Collections.Generic.List[object]
   $urls = New-Object System.Collections.Generic.HashSet[string]
 
+  # Known StreamPlugins UUIDs prefix to identify and clean up old forced docks
+  $spUuidPrefix = "A3F2C8E17B4D4E9A9C1F2D8E6B5A"
+
   foreach ($dock in $existing) {
-    if ($null -ne $dock.url -and $urls.Add([string]$dock.url)) {
-      $merged.Add($dock)
+    if ($null -ne $dock.url) {
+      $uuidStr = [string]$dock.uuid
+      # Filter out existing StreamPlugins docks if we are performing a clean/primary register
+      if ($uuidStr.StartsWith($spUuidPrefix)) {
+        continue
+      }
+      if ($urls.Add([string]$dock.url)) {
+        $merged.Add($dock)
+      }
     }
   }
 
@@ -59,7 +83,7 @@ function Update-ObsIniFile([string]$iniPath, [object[]]$incomingDocks) {
     }
   }
 
-  $merged = Merge-Docks $existing $incomingDocks
+  $merged = Clean-And-Merge-Docks $existing $incomingDocks
   $json = ($merged | ConvertTo-Json -Compress -Depth 5)
 
   if ($text -match '(?m)^ExtraBrowserDocks=') {
@@ -87,7 +111,7 @@ if ($obs -and -not $Force) {
   throw "OBS Studio is running (PID $($obs.Id -join ', ')). Fully quit OBS from the system tray, then run this script again."
 }
 
-$docks = Get-StreamPluginsDocks $BaseUrl
+$docks = Get-StreamPluginsDocks $BaseUrl $Mode
 $userIni = Join-Path $ObsConfigDir "user.ini"
 $globalIni = Join-Path $ObsConfigDir "global.ini"
 
@@ -96,5 +120,5 @@ if (Test-Path $globalIni) {
   Update-ObsIniFile $globalIni $docks
 }
 
-Write-Host "StreamPlugins docks registered."
-Write-Host "Next: run Start StreamPlugins Server, then open OBS and enable docks under View > Docks."
+Write-Host "StreamPlugins dock registration complete (Mode: $Mode)."
+Write-Host "OBS will now start cleanly without 9 windows popping open!"

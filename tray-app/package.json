@@ -10,9 +10,13 @@
     "start": "node dist/main.js"
   },
   "dependencies": {
-    "@streamplugins/server": "*"
+    "@streamplugins/server": "*",
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/qrcode": "^1.5.5",
+    "electron": "^33.0.0",
     "esbuild": "^0.24.0",
     "tsx": "^4.19.0"
   }

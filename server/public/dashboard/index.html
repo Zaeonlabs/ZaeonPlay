@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>StreamPlugins — Mobile Chat Dashboard</title>
+  <link rel="stylesheet" href="/plugins/shared/css/base.css">
+  <link rel="stylesheet" href="/plugins/shared/css/themes.css">
+  <script src="/plugins/shared/js/theme-loader.js"></script>
+  <style>
+    :root {
+      --sp-bg-primary: #0e0e10;
+      --sp-bg-secondary: #18181b;
+      --sp-bg-tertiary: #27272a;
+      --sp-border: #2e2e32;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: var(--sp-bg-primary);
+      color: var(--sp-text-primary);
+      font-family: var(--sp-font);
+      font-size: var(--sp-fs-md);
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .dashboard-layout {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      height: 100dvh;
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--sp-bg-primary);
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Top Bar Header */
+    .dashboard-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--sp-3) var(--sp-4);
+      background: var(--sp-bg-secondary);
+      border-bottom: 1px solid var(--sp-border);
+      flex-shrink: 0;
+      gap: var(--sp-3);
+      z-index: 10;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+    }
+
+    .header-title {
+      font-size: 1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      letter-spacing: -0.01em;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      background: var(--sp-bg-tertiary);
+      border-radius: var(--sp-r-full);
+      font-size: var(--sp-fs-xs);
+      font-weight: 600;
+      border: 1px solid var(--sp-border);
+    }
+
+    /* Filter Controls */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: var(--sp-2) var(--sp-4);
+      background: var(--sp-bg-secondary);
+      border-bottom: 1px solid var(--sp-border);
+      overflow-x: auto;
+      white-space: nowrap;
+      flex-shrink: 0;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .filter-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: var(--sp-r-full);
+      font-size: var(--sp-fs-xs);
+      font-weight: 600;
+      background: var(--sp-bg-tertiary);
+      color: var(--sp-text-secondary);
+      border: 1px solid var(--sp-border);
+      cursor: pointer;
+      transition: all var(--sp-t-fast);
+      user-select: none;
+    }
+    .filter-btn:hover { color: var(--sp-text-primary); }
+    .filter-btn.active {
+      background: var(--sp-accent);
+      color: #fff;
+      border-color: var(--sp-accent);
+    }
+    .filter-btn.active--twitch  { background: var(--sp-twitch); border-color: var(--sp-twitch); color: #fff; }
+    .filter-btn.active--youtube { background: var(--sp-youtube); border-color: var(--sp-youtube); color: #fff; }
+    .filter-btn.active--kick    { background: var(--sp-kick); border-color: var(--sp-kick); color: #000; }
+
+    /* Chat Messages Container */
+    .chat-body-wrapper {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--sp-3) var(--sp-4);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+    }
+
+    /* Individual Chat Message Item */
+    .chat-msg {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--sp-2);
+      padding: 8px 12px;
+      border-radius: var(--sp-r-md);
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid transparent;
+      animation: chatFadeIn 0.2s var(--sp-ease);
+      transition: background var(--sp-t-fast);
+      font-size: 0.9375rem; /* 15px readable font size */
+      line-height: 1.5;
+      word-break: break-word;
+    }
+    .chat-msg:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--sp-glass-border);
+    }
+
+    .chat-msg-time {
+      flex-shrink: 0;
+      font-size: var(--sp-fs-xs);
+      color: var(--sp-text-muted);
+      margin-top: 3px;
+      font-variant-numeric: tabular-nums;
+      min-width: 48px;
+    }
+
+    .chat-msg-platform-badge {
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .chat-msg-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .chat-msg-header {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-right: 6px;
+    }
+
+    .chat-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .chat-badge--mod { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+    .chat-badge--sub { background: rgba(145, 70, 255, 0.2); color: #c084fc; border: 1px solid rgba(145, 70, 255, 0.3); }
+    .chat-badge--broadcaster { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .chat-badge--vip { background: rgba(236, 72, 153, 0.2); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.3); }
+
+    .chat-msg-username {
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .chat-msg-username--twitch  { color: var(--sp-twitch); }
+    .chat-msg-username--youtube { color: var(--sp-youtube); }
+    .chat-msg-username--kick    { color: #53FC18; }
+
+    .chat-msg-content {
+      color: var(--sp-text-primary);
+    }
+
+    /* Floating Jump to Bottom Button */
+    .jump-bottom-btn {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      opacity: 0;
+      pointer-events: none;
+      background: var(--sp-accent);
+      color: #fff;
+      border: none;
+      padding: 8px 18px;
+      border-radius: var(--sp-r-full);
+      font-size: var(--sp-fs-xs);
+      font-weight: 700;
+      box-shadow: var(--sp-shadow-lg);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.25s var(--sp-ease);
+      z-index: 20;
+    }
+    .jump-bottom-btn.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+    .jump-bottom-btn:hover {
+      filter: brightness(1.15);
+      transform: translateX(-50%) translateY(-2px);
+    }
+
+    /* Empty state */
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--sp-text-muted);
+      gap: var(--sp-3);
+      padding: var(--sp-8);
+      text-align: center;
+    }
+    .empty-state p { font-size: var(--sp-fs-sm); }
+
+    @keyframes chatFadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-layout">
+    <!-- Header Bar -->
+    <header class="dashboard-header">
+      <div class="header-left">
+        <div class="header-title">
+          <span id="chat-icon"></span>
+          <span>Chat Dashboard</span>
+        </div>
+        <div class="status-badge" id="status-badge">
+          <span class="sp-dot sp-dot--off" id="status-dot"></span>
+          <span id="status-text">Connecting...</span>
+        </div>
+      </div>
+      <button class="sp-btn sp-btn-ghost sp-btn-sm" onclick="clearMessages()" title="Clear chat window">Clear</button>
+    </header>
+
+    <!-- Platform Filter Bar -->
+    <div class="filter-bar">
+      <button class="filter-btn active" data-platform="all" onclick="setFilter('all')">
+        All Platforms
+      </button>
+      <button class="filter-btn" data-platform="twitch" onclick="setFilter('twitch')">
+        <span id="filter-icon-twitch"></span> Twitch
+      </button>
+      <button class="filter-btn" data-platform="youtube" onclick="setFilter('youtube')">
+        <span id="filter-icon-youtube"></span> YouTube
+      </button>
+      <button class="filter-btn" data-platform="kick" onclick="setFilter('kick')">
+        <span id="filter-icon-kick"></span> Kick
+      </button>
+    </div>
+
+    <!-- Chat Container -->
+    <div class="chat-body-wrapper">
+      <div class="chat-messages" id="messages-container">
+        <div class="empty-state" id="empty-state">
+          <span id="empty-chat-icon" style="opacity: 0.4;"></span>
+          <div>
+            <strong>Waiting for live messages...</strong>
+            <p>Connect your Twitch, YouTube, or Kick account in Settings.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating Jump to Bottom Button -->
+      <button class="jump-bottom-btn" id="jump-btn" onclick="scrollToBottom(true)">
+        <span>New messages below</span>
+        <span>↓</span>
+      </button>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js" onerror="console.warn('Socket.io script failed to load from server')"></script>
+  <script src="/plugins/shared/js/icons.js"></script>
+  <script src="/plugins/shared/js/utils.js"></script>
+  <script src="/plugins/shared/js/ws-client.js"></script>
+  <script>
+    // Inject header and filter icons
+    if (typeof SPIcons !== 'undefined') {
+      SPIcons.inject(document.getElementById('chat-icon'), 'chat');
+      SPIcons.inject(document.getElementById('empty-chat-icon'), 'chat', { size: '48px' });
+      SPIcons.inject(document.getElementById('filter-icon-twitch'), 'twitch', { color: '#9146FF', size: '14px' });
+      SPIcons.inject(document.getElementById('filter-icon-youtube'), 'youtube', { color: '#FF0000', size: '14px' });
+      SPIcons.inject(document.getElementById('filter-icon-kick'), 'kick', { color: '#53FC18', size: '14px' });
+    }
+
+    const messagesContainer = document.getElementById('messages-container');
+    const emptyState = document.getElementById('empty-state');
+    const jumpBtn = document.getElementById('jump-btn');
+    const statusDot = document.getElementById('status-dot');
+    const statusText = document.getElementById('status-text');
+
+    const MAX_MESSAGES = 300;
+    let autoScroll = true;
+    let currentFilter = 'all';
+    let unreadCount = 0;
+
+    // Detect user scroll action
+    messagesContainer.addEventListener('scroll', () => {
+      const { scrollTop, scrollHeight, clientHeight } = messagesContainer;
+      // If user is within 60px of the bottom, auto-scroll stays enabled
+      const isAtBottom = scrollHeight - scrollTop - clientHeight < 60;
+      autoScroll = isAtBottom;
+
+      if (autoScroll) {
+        unreadCount = 0;
+        jumpBtn.classList.remove('visible');
+      }
+    });
+
+    function scrollToBottom(force = false) {
+      if (force) {
+        autoScroll = true;
+        unreadCount = 0;
+        jumpBtn.classList.remove('visible');
+      }
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function setFilter(platform) {
+      currentFilter = platform;
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        const p = btn.dataset.platform;
+        btn.className = 'filter-btn' + (p === platform ? ` active ${p !== 'all' ? 'active--' + p : ''}` : '');
+      });
+
+      // Filter visible messages
+      const msgs = messagesContainer.querySelectorAll('.chat-msg');
+      msgs.forEach(msg => {
+        if (platform === 'all' || msg.dataset.platform === platform) {
+          msg.style.display = 'flex';
+        } else {
+          msg.style.display = 'none';
+        }
+      });
+
+      if (autoScroll) scrollToBottom();
+    }
+
+    function renderMessage(msg) {
+      if (!msg) return;
+
+      if (emptyState && emptyState.parentNode) {
+        emptyState.remove();
+      }
+
+      const platform = (msg.platform || 'twitch').toLowerCase();
+      const user = msg.user || {};
+      const username = user.displayName || user.name || 'Anonymous';
+      const userColor = user.color || platformColor(platform);
+      const content = msg.content || '';
+      const timestamp = msg.timestamp || Date.now();
+
+      const el = document.createElement('div');
+      el.className = 'chat-msg';
+      el.dataset.platform = platform;
+      if (currentFilter !== 'all' && currentFilter !== platform) {
+        el.style.display = 'none';
+      }
+
+      // Badges
+      let badgesHTML = '';
+      if (Array.isArray(user.badges)) {
+        user.badges.forEach(b => {
+          const badgeType = String(b).toLowerCase();
+          if (badgeType.includes('mod')) badgesHTML += '<span class="chat-badge chat-badge--mod">MOD</span>';
+          else if (badgeType.includes('sub')) badgesHTML += '<span class="chat-badge chat-badge--sub">SUB</span>';
+          else if (badgeType.includes('broadcaster') || badgeType.includes('streamer')) badgesHTML += '<span class="chat-badge chat-badge--broadcaster">HOST</span>';
+          else if (badgeType.includes('vip')) badgesHTML += '<span class="chat-badge chat-badge--vip">VIP</span>';
+        });
+      }
+
+      const badgeClass = `sp-badge sp-badge-${platform}`;
+      const platformIconHTML = typeof platformIcon === 'function' ? platformIcon(platform, 'xs') : '';
+
+      el.innerHTML = `
+        <span class="chat-msg-time">${formatTime(timestamp)}</span>
+        <span class="${badgeClass} chat-msg-platform-badge">${platformIconHTML}</span>
+        <div class="chat-msg-body">
+          <span class="chat-msg-header">
+            ${badgesHTML}
+            <span class="chat-msg-username chat-msg-username--${platform}" style="color:${userColor}">${escapeHTML(username)}:</span>
+          </span>
+          <span class="chat-msg-content">${escapeHTML(content)}</span>
+        </div>
+      `;
+
+      messagesContainer.appendChild(el);
+
+      // Prune old messages
+      while (messagesContainer.children.length > MAX_MESSAGES) {
+        messagesContainer.removeChild(messagesContainer.firstChild);
+      }
+
+      if (autoScroll) {
+        scrollToBottom();
+      } else {
+        unreadCount++;
+        jumpBtn.querySelector('span').textContent = `${unreadCount} new message${unreadCount > 1 ? 's' : ''} below`;
+        jumpBtn.classList.add('visible');
+      }
+    }
+
+    function clearMessages() {
+      messagesContainer.innerHTML = '';
+      unreadCount = 0;
+      jumpBtn.classList.remove('visible');
+    }
+
+    // Connect via Socket.io
+    function initSocketIO() {
+      if (typeof io !== 'undefined') {
+        const socket = io();
+
+        socket.on('connect', () => {
+          statusDot.className = 'sp-dot sp-dot--on';
+          statusText.textContent = 'Live';
+        });
+
+        socket.on('disconnect', () => {
+          statusDot.className = 'sp-dot sp-dot--off';
+          statusText.textContent = 'Disconnected';
+        });
+
+        socket.on('chat_message', (msg) => {
+          renderMessage(msg);
+        });
+
+        socket.on('chat', (msg) => {
+          renderMessage(msg);
+        });
+      }
+    }
+
+    // Connect via fallback StreamPlugins WebSocket client
+    function initFallbackWS() {
+      spWebSocket.connect();
+      spWebSocket.on('connected', () => {
+        statusDot.className = 'sp-dot sp-dot--on';
+        statusText.textContent = 'Live';
+      });
+      spWebSocket.on('disconnected', () => {
+        statusDot.className = 'sp-dot sp-dot--off';
+        statusText.textContent = 'Disconnected';
+      });
+      spWebSocket.on('chat', (msg) => renderMessage(msg));
+      spWebSocket.on('chat_message', (msg) => renderMessage(msg));
+    }
+
+    initSocketIO();
+    initFallbackWS();
+  </script>
+</body>
+</html>
