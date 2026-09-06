@@ -8,11 +8,14 @@ Whether you are setting up your stream for the first time, using the desktop das
 
 ## 📑 Table of Contents
 
-1. [Understanding OBS Plugin Windows & Data Storage](#1-understanding-obs-plugin-windows--data-storage)
-2. [Case 1: First-Time Setup & Account Connections](#case-1-first-time-setup--account-connections)
-3. [Case 2: Using the Desktop Central Dashboard](#case-2-using-the-desktop-central-dashboard)
-4. [Case 3: QR Code & Mobile Smartphone Control](#case-3-qr-code--mobile-smartphone-control)
-5. [Case 4: Step-by-Step Guides for Every Feature](#case-4-step-by-step-guides-for-every-feature)
+1. [🚀 Step-by-Step Installation & Setup (Windows & Mac)](#-step-by-step-installation--setup-windows--mac)
+   - [Path 1: Installer-Based Setup (Automatic)](#-path-1-installer-based-setup-automatic)
+   - [Path 2: Non-Installer / Portable Setup (Manual)](#-path-2-non-installer--standalone--portable-setup-manual)
+2. [Understanding OBS Plugin Windows & Data Storage](#1-understanding-obs-plugin-windows--data-storage)
+3. [Case 1: First-Time Setup & Account Connections](#case-1-first-time-setup--account-connections)
+4. [Case 2: Using the Desktop Central Dashboard](#case-2-using-the-desktop-central-dashboard)
+5. [Case 3: QR Code & Mobile Smartphone Control](#case-3-qr-code--mobile-smartphone-control)
+6. [Case 4: Step-by-Step Guides for Every Feature](#case-4-step-by-step-guides-for-every-feature)
    - [A. Stream Metrics Widget](#a-stream-metrics-widget)
    - [B. Stream Title & Game Updater](#b-stream-title--game-updater)
    - [C. Unified Multi-Platform Chat](#c-unified-multi-platform-chat)
@@ -22,7 +25,78 @@ Whether you are setting up your stream for the first time, using the desktop das
    - [G. Donation Alerts (PayPal, Stripe, Ko-fi)](#g-donation-alerts-paypal-stripe-ko-fi)
    - [H. Discord Event & Chat Logger](#h-discord-event--chat-logger)
    - [I. OBS Scene Automation & Reactions](#i-obs-scene-automation--reactions)
-6. [Troubleshooting & Frequently Asked Questions](#troubleshooting--frequently-asked-questions)
+7. [Troubleshooting & Frequently Asked Questions](#troubleshooting--frequently-asked-questions)
+
+---
+
+## 🚀 Step-by-Step Installation & Setup (Windows & Mac)
+
+Before using StreamPlugins, you need to set it up on your computer. There are **two simple ways** to set it up depending on your preference:
+
+1. **Path 1: Installer-Based Setup (Automatic & Easy)** — Best if you want the installer to configure everything in OBS Studio for you automatically.
+2. **Path 2: Non-Installer / Portable Setup (Manual Control)** — Best if you don't want to run an installer, prefer a portable folder, or want to add plugin windows manually into OBS.
+
+---
+
+### 💻 Path 1: Installer-Based Setup (Automatic)
+
+This method installs StreamPlugins directly into your OBS Studio program files so your plugin windows appear inside OBS automatically.
+
+#### 🪟 On Windows (Installer Method)
+1. **Close OBS Studio**: Make sure OBS Studio is completely closed. (Check your taskbar/tray to ensure it's quit).
+2. **Download the Windows Installer**: Download `streamplugins-setup.exe` (or `streamplugins-obs-plugin-windows-x64.exe`) from the official Releases page.
+3. **Run the Installer**:
+   - Double-click the downloaded file.
+   - If Windows shows a "SmartScreen" warning, click **More Info** -> **Run Anyway**.
+   - Click **Next** through the setup wizard screens.
+4. **Finish Setup**: Click **Finish**. The installer automatically registers your main control panel in OBS and creates a **Start StreamPlugins Server** shortcut in your Start Menu.
+5. **Start the Server**: Open your Windows Start Menu, search for **Start StreamPlugins Server**, and click it to launch the server background service.
+6. **Open OBS Studio**: Launch OBS Studio. Go to the top menu bar, click **Docks** (or **View → Docks**), and check **StreamPlugins: Settings**.
+
+#### 🍏 On macOS / Mac (Installer Method)
+1. **Close OBS Studio**: Quit OBS Studio completely (`Cmd + Q`).
+2. **Download the Mac Installer**: Download `streamplugins-obs-plugin-macos-universal.pkg` from the official Releases page.
+3. **Run the Package Installer**:
+   - Double-click the downloaded `.pkg` file.
+   - Follow the step-by-step installer screens on your Mac and enter your Mac password when prompted.
+4. **Open OBS Studio**: Open OBS Studio.
+5. **Enable Plugin Docks**: Click **Docks** (or **View → Docks**) in the top Mac menu bar and check **StreamPlugins: Settings**.
+
+---
+
+### 📦 Path 2: Non-Installer / Standalone / Portable Setup (Manual)
+
+If you don't want to run a system installer, you can run StreamPlugins as a portable folder or standalone application.
+
+#### 🪟 On Windows (Non-Installer / Portable Method)
+1. **Download the Zip Package / Tray App**: Download the `.zip` archive or `StreamPlugins-Tray-App.zip`.
+2. **Unzip the Folder**: Right-click the `.zip` file, select **Extract All...**, and choose a folder on your computer (for example `C:\StreamPlugins`).
+3. **Start the Server App**:
+   - Open the extracted folder.
+   - Double-click `start-server.cmd` (or `streamplugins-tray.exe`).
+   - A small window or system tray icon will appear indicating that the server is running locally.
+4. **Open OBS Studio**: Launch OBS Studio.
+5. **Add Custom Browser Docks to OBS**:
+   - In OBS, click **Docks** in the top menu bar -> **Custom Browser Docks...**
+   - Under **Dock Name**, type a friendly name (e.g., `StreamPlugins: Chat`).
+   - Under **URL**, type the web link for the plugin:
+     - Settings Panel: `http://localhost:3847/plugins/settings/`
+     - Combined Chat: `http://localhost:3847/plugins/chat-widget/`
+     - Metrics Widget: `http://localhost:3847/plugins/metrics-widget/`
+     - Stream Title Updater: `http://localhost:3847/plugins/title-updater/`
+     - Multistream Alerts: `http://localhost:3847/plugins/alerts/`
+   - Click **Apply**. The dock window will pop up inside OBS!
+
+#### 🍏 On macOS / Mac (Non-Installer / Portable Method)
+1. **Download the Standalone App / Zip**: Download `StreamPlugins-Mac-Standalone.zip` or `StreamPlugins.app`.
+2. **Move to Applications (Optional)**: Unzip the file and drag `StreamPlugins.app` into your **Applications** folder (or run it from any folder).
+3. **Launch the App**: Double-click `StreamPlugins.app`. (If macOS displays an unverified developer message, right-click the app, choose **Open**, and click **Open**).
+4. **Verify Server Status**: An icon will appear in your top Mac menu bar showing the server is live (`http://localhost:3847`).
+5. **Add Custom Browser Docks to OBS**:
+   - Open OBS Studio on your Mac.
+   - Click **Docks** in the top Mac menu bar -> **Custom Browser Docks...**
+   - Add your dock names and URLs (e.g., Dock Name: `StreamPlugins Settings`, URL: `http://localhost:3847/plugins/settings/`).
+   - Click **Apply**.
 
 ---
 

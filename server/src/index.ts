@@ -90,6 +90,19 @@ app.use('/plugins', express.static(pluginsDir));
 const publicDir = resolvePublicDir();
 app.use('/public', express.static(publicDir));
 
+// Root route redirect to Central Dashboard
+app.get('/', (_req, res) => {
+  res.redirect('/dashboard');
+});
+
+// Friendly shortcut redirects
+app.get('/settings', (_req, res) => res.redirect('/plugins/settings/'));
+app.get('/metrics', (_req, res) => res.redirect('/plugins/metrics-widget/'));
+app.get('/title', (_req, res) => res.redirect('/plugins/title-updater/'));
+app.get('/alerts', (_req, res) => res.redirect('/plugins/alerts/'));
+app.get('/chat', (_req, res) => res.redirect('/plugins/chat-widget/'));
+app.get('/discord', (_req, res) => res.redirect('/plugins/discord-logger/settings.html'));
+
 // Route /dashboard serving server/public/dashboard/index.html
 app.get('/dashboard', (_req, res) => {
   const dashboardPath = path.join(publicDir, 'dashboard', 'index.html');

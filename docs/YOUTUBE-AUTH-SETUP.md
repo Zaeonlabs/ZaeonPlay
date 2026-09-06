@@ -121,13 +121,19 @@ YOUTUBE_CLIENT_SECRET=your_client_secret_here
 - **Cause**: The Google account trying to log in is not listed under **Test Users** while the consent screen is in "Testing" mode.
 - **Solution**: Go to **APIs & Services** > **OAuth consent screen** > **Test Users**, click **+ Add Users**, and add the email address.
 
-### ❌ `redirect_uri_mismatch` (Error 400)
-- **Cause**: The redirect URI sent by your application does not match the URI configured in Google Cloud Console.
-- **Solution**: Ensure `http://localhost:3847/auth/youtube/callback` is added under **Authorized redirect URIs** in your OAuth Client ID settings. Pay close attention to `http` vs `https`, trailing slashes, and port numbers.
-
-### ❌ `403 quotaExceeded`
-- **Cause**: Your daily YouTube Data API v3 quota (default 10,000 units/day) has been exhausted.
-- **Solution**: Optimize API calls (e.g., cache channel metadata, avoid frequent polling of heavy endpoints like `search`). You can inspect current quota consumption under **APIs & Services** > **Enabled APIs & services** > **YouTube Data API v3** > **Quotas**.
+### ❌ Google Prompting for "Verify Branding" / App Review
+- **Cause**: Google requires brand verification if you upload an **App Logo**, add unverified website domains (Privacy Policy / Terms URLs), or click "Publish App".
+- **Bypass Solution (Get keys instantly in Testing mode)**:
+  1. Go to **APIs & Services** > **OAuth consent screen**.
+  2. Ensure **Publishing status** is set to **Testing** (do **NOT** click "Publish App").
+  3. Edit your consent screen and **remove/leave empty**:
+     - ❌ **App logo**: Leave empty (uploading a logo forces brand verification).
+     - ❌ **Application home page**: Leave empty.
+     - ❌ **Application privacy policy / terms links**: Leave empty for testing.
+     - ❌ **Authorized domains**: Leave empty.
+  4. Save the consent screen. 
+  5. Go to **APIs & Services** > **Credentials** > **+ Create Credentials** > **OAuth client ID**.
+  6. Select **Web application** or **Desktop app**. Google will immediately output your **Client ID** and **Client Secret** without any verification required!
 
 ---
 
