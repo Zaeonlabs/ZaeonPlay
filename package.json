@@ -1,6 +1,6 @@
 {
   "name": "streamplugins",
-  "version": "0.1.0",
+  "version": "0.1.6",
   "description": "Multi-platform streaming tools for OBS Studio -- metrics, title updater, alerts, chat, and Discord logger for Twitch, YouTube, and Kick",
   "private": true,
   "license": "MIT",

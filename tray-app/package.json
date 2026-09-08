@@ -1,6 +1,6 @@
 {
   "name": "@streamplugins/tray-app",
-  "version": "0.1.0",
+  "version": "0.1.6",
   "description": "StreamPlugins standalone system tray application",
   "private": true,
   "main": "dist/main.js",

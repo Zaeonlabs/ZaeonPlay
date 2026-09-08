@@ -1,6 +1,6 @@
 {
   "name": "@streamplugins/server",
-  "version": "0.1.0",
+  "version": "0.1.6",
   "description": "StreamPlugins backend server -- OAuth, API proxy, WebSocket manager, Discord forwarder",
   "private": true,
   "main": "dist/index.js",

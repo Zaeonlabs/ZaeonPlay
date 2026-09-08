@@ -56,6 +56,9 @@ Desktop.ini
 *.swp
 *.swo
 *~
+.agents/
+mcp_config.json
+
 
 # Logs
 logs/
